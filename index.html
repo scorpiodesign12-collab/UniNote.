@@ -1549,6 +1549,11 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           if (!ls || !ls.subjectName || !ls.start || !ls.end) return;
           const subjectId = findOrCreateSubjectByName(ls.subjectName);
           if (!subjectId) return;
+          // Match the color the sharing person set for this subject.
+          if (ls.subjectColor && SUBJECT_COLORS[ls.subjectColor]) {
+            const subj = state.subjects.find(s => s.id === subjectId);
+            if (subj) subj.color = ls.subjectColor;
+          }
           const existing = (state.schedule[weekday] || []).some(x => x.start === ls.start && x.end === ls.end && x.subjectId === subjectId);
           if (existing) return;
           addLesson({
@@ -1559,6 +1564,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           added++;
         });
       });
+      persist();
       return added;
     }
     function getDayNote(dateKey) { return state.dayNotes[dateKey] || ""; }
