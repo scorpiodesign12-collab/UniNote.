@@ -500,6 +500,43 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .modal-x{ color:var(--text-2); font-size:22px; line-height:1; width:30px; height:30px; }
 .modal-body{ padding:8px 18px 22px; }
 
+/* SHARE REQUEST OVERLAY (incoming schedule share) */
+.share-overlay-backdrop{
+  position:fixed; inset:0; z-index:90; background:rgba(10,10,16,.5);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  opacity:0; visibility:hidden; transition:opacity .22s ease;
+}
+.share-overlay-backdrop.open{ opacity:1; visibility:visible; }
+.share-overlay-card{
+  position:relative; width:100%; max-width:360px;
+  background:var(--card); border-radius:var(--radius-l);
+  padding:30px 22px 22px; text-align:center;
+  box-shadow:var(--shadow-pop);
+  transform:scale(.92); transition:transform .25s cubic-bezier(.32,.72,0,1);
+}
+.share-overlay-backdrop.open .share-overlay-card{ transform:scale(1); }
+.share-overlay-close{
+  position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; color:var(--text-2);
+}
+.share-overlay-close:active{ background:var(--border); }
+.share-overlay-avatar{
+  width:58px; height:58px; border-radius:50%; margin:0 auto 14px;
+  background:var(--accent-soft); color:var(--accent);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:21px; overflow:hidden;
+}
+.share-overlay-avatar img{ width:100%; height:100%; object-fit:cover; }
+.share-overlay-title{ font-family:var(--font-display); font-weight:800; font-size:16.5px; margin-bottom:6px; }
+.share-overlay-text{ font-size:14px; line-height:1.5; color:var(--text-2); margin-bottom:22px; }
+.share-overlay-text b{ color:var(--text); font-weight:700; }
+.share-overlay-accept{
+  width:100%; padding:14px; border-radius:16px; background:var(--accent); color:#fff;
+  font-weight:700; font-size:15px; box-shadow:0 14px 24px -12px rgba(124,110,246,.55);
+}
+.share-overlay-accept:active{ transform:scale(.97); }
+.share-overlay-accept[disabled]{ opacity:.6; }
+.lesson-range{ font-size:11px; color:var(--text-3); margin-top:2px; }
+
 .field-label{ display:block; font-size:12.5px; font-weight:700; color:var(--text-2); margin:14px 0 7px; }
 .field-label:first-child{ margin-top:0; }
 .field-input{
@@ -828,6 +865,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
               </div>
               <span class="settings-value" id="tgStatus">Не подключён</span>
             </button>
+            <button class="settings-row link-row" id="shareScheduleRow">
+              <div class="settings-row-label">
+                <span class="settings-icon" style="background:#E8F8ED;color:#34C759;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0-12l4 4m-4-4l-4 4M5 14v4a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span>Поделиться расписанием</span>
+              </div>
+              <span class="settings-value" id="shareScheduleStatus">Ссылкой в Telegram</span>
+            </button>
           </div>
         </div>
 
@@ -951,6 +995,11 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <input class="field-input" type="time" id="newLessonStart" value="09:00">
         <input class="field-input" type="time" id="newLessonEnd" value="10:30">
       </div>
+      <label class="field-label">Действует с — по (необязательно)</label>
+      <div class="two-field-row">
+        <input class="field-input" type="date" id="newLessonDateFrom">
+        <input class="field-input" type="date" id="newLessonDateTo">
+      </div>
       <label class="field-label">Аудитория (необязательно)</label>
       <input class="field-input" id="newLessonRoom" placeholder="Например, 204">
       <label class="field-label">Преподаватель (необязательно)</label>
@@ -1052,6 +1101,19 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     </div>
   </div>
 
+  <!-- ===================== SHARE REQUEST OVERLAY ===================== -->
+  <div class="share-overlay-backdrop" id="shareOverlayBackdrop">
+    <div class="share-overlay-card">
+      <button class="share-overlay-close" id="shareOverlayClose" aria-label="Отклонить">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="share-overlay-avatar" id="shareOverlayAvatar">?</div>
+      <div class="share-overlay-title">Приглашение</div>
+      <div class="share-overlay-text" id="shareOverlayText">Пользователь делится с вами расписанием пар</div>
+      <button class="share-overlay-accept" id="shareOverlayAccept">Принять</button>
+    </div>
+  </div>
+
   <!-- toast -->
   <div class="toast" id="toast"></div>
 
@@ -1062,6 +1124,36 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
 (function () {
   "use strict";
+
+  /* ============================================================
+     SHARE CONFIG — needed only for the "share schedule via link"
+     feature (Settings → «Поделиться расписанием»).
+     Fill these in once you have a Supabase project:
+       1. Create a project at supabase.com (free tier is enough).
+       2. SQL editor → run:
+            create table shared_schedules (
+              id text primary key,
+              owner_name text,
+              owner_handle text,
+              payload jsonb not null,
+              created_at timestamptz default now()
+            );
+            alter table shared_schedules enable row level security;
+            create policy "anon insert" on shared_schedules for insert to anon with check (true);
+            create policy "anon select" on shared_schedules for select to anon using (true);
+            create policy "anon delete" on shared_schedules for delete to anon using (true);
+       3. Project Settings → API → copy "Project URL" and "anon public" key below.
+       4. BOT_USERNAME must match your bot's @username exactly (no @, no https://).
+       5. In @BotFather: open your bot → Bot Settings → Configure Mini App (or
+          /newapp) and set the Mini App's URL to this page's deployed URL.
+          Once that's set, links like https://t.me/BOT_USERNAME?startapp=CODE
+          open the Mini App directly — no bot server code needed for sharing.
+     ============================================================ */
+  const SHARE_CONFIG = {
+    SUPABASE_URL: "",       // e.g. "https://xxxxx.supabase.co"
+    SUPABASE_ANON_KEY: "",  // the "anon public" API key from Supabase
+    BOT_USERNAME: "UniNoteHelperBot",
+  };
 
   /* 0. TELEGRAM WEBAPP INTEGRATION */
   const TelegramService = (() => {
@@ -1107,7 +1199,80 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
     function isAvailable() { return !!tg; }
 
-    return { init, haptic, setBackButtonVisible, getUser, isAvailable };
+    // The payload passed via a `?startapp=CODE` deep link (or `?start=CODE`
+    // when the bot forwards it as a classic /start command). Falls back to
+    // reading the URL directly so the flow is also testable outside Telegram.
+    function getStartParam() {
+      try {
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) return tg.initDataUnsafe.start_param;
+      } catch (e) {}
+      try {
+        const url = new URL(window.location.href);
+        return url.searchParams.get("tgWebAppStartParam") || url.searchParams.get("startapp") || url.searchParams.get("share") || null;
+      } catch (e) { return null; }
+    }
+
+    // Opens Telegram's own "forward to a chat" sheet for a link — the
+    // closest native equivalent of a share button inside a Mini App.
+    function shareLink(url, text) {
+      const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(url) + (text ? "&text=" + encodeURIComponent(text) : "");
+      if (tg && tg.openTelegramLink) { try { tg.openTelegramLink(shareUrl); return true; } catch (e) {} }
+      if (tg && tg.openLink) { try { tg.openLink(shareUrl); return true; } catch (e) {} }
+      return false;
+    }
+
+    return { init, haptic, setBackButtonVisible, getUser, isAvailable, getStartParam, shareLink };
+  })();
+
+  /* 0b. SHARE SERVICE — stores/retrieves a shared schedule via Supabase so
+     it can travel from one person's device to another's through a link. */
+  const ShareService = (() => {
+    function configured() { return !!(SHARE_CONFIG.SUPABASE_URL && SHARE_CONFIG.SUPABASE_ANON_KEY); }
+
+    function genCode() {
+      // 20 hex chars — short enough for a URL, long enough to not collide/guess.
+      let s = "";
+      for (let i = 0; i < 20; i++) s += Math.floor(Math.random() * 16).toString(16);
+      return s;
+    }
+
+    async function createShare({ ownerName, ownerHandle, payload }) {
+      if (!configured()) throw new Error("not_configured");
+      const id = genCode();
+      const res = await fetch(SHARE_CONFIG.SUPABASE_URL + "/rest/v1/shared_schedules", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SHARE_CONFIG.SUPABASE_ANON_KEY,
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify([{ id, owner_name: ownerName || "", owner_handle: ownerHandle || "", payload }]),
+      });
+      if (!res.ok) throw new Error("create_failed");
+      return id;
+    }
+
+    async function fetchShare(id) {
+      if (!configured()) throw new Error("not_configured");
+      const res = await fetch(SHARE_CONFIG.SUPABASE_URL + "/rest/v1/shared_schedules?id=eq." + encodeURIComponent(id) + "&select=*", {
+        headers: { "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY, "Authorization": "Bearer " + SHARE_CONFIG.SUPABASE_ANON_KEY },
+      });
+      if (!res.ok) throw new Error("fetch_failed");
+      const rows = await res.json();
+      return rows && rows[0] ? rows[0] : null;
+    }
+
+    // Best-effort cleanup — a share code is meant to be used once.
+    function deleteShare(id) {
+      if (!configured()) return;
+      fetch(SHARE_CONFIG.SUPABASE_URL + "/rest/v1/shared_schedules?id=eq." + encodeURIComponent(id), {
+        method: "DELETE",
+        headers: { "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY, "Authorization": "Bearer " + SHARE_CONFIG.SUPABASE_ANON_KEY },
+      }).catch(() => {});
+    }
+
+    return { configured, createShare, fetchShare, deleteShare };
   })();
 
   /* 1. STORE — persistence layer (swap-ready for a backend) */
@@ -1322,13 +1487,24 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       return Array.from({ length: 7 }, (_, i) => { const x = new Date(monday); x.setDate(monday.getDate() + i); return x; });
     }
     function getLessonsForWeekday(isoWeekday) { return state.schedule[isoWeekday] || []; }
+    // A lesson with dateFrom/dateTo only shows up on days inside that range
+    // (e.g. a semester: 1 сентября – 31 декабря). No dates set = always shown.
+    function lessonActiveOn(ls, dateStr) {
+      if (ls.dateFrom && dateStr < ls.dateFrom) return false;
+      if (ls.dateTo && dateStr > ls.dateTo) return false;
+      return true;
+    }
     function getLessonsForDate(date) {
       const dow = ((new Date(date).getDay() + 6) % 7) + 1;
-      return getLessonsForWeekday(dow);
+      const dk = dateKey(date);
+      return getLessonsForWeekday(dow).filter(ls => lessonActiveOn(ls, dk));
     }
-    function addLesson({ weekday, subjectId, start, end, room, teacher, color }) {
-      const id = "l_" + Date.now();
-      const lesson = { id, subjectId, start, end, room: room || "", teacher: teacher || "", color: color || null };
+    function addLesson({ weekday, subjectId, start, end, room, teacher, color, dateFrom, dateTo }) {
+      const id = "l_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+      const lesson = {
+        id, subjectId, start, end, room: room || "", teacher: teacher || "", color: color || null,
+        dateFrom: dateFrom || null, dateTo: dateTo || null,
+      };
       if (!state.schedule[weekday]) state.schedule[weekday] = [];
       state.schedule[weekday].push(lesson);
       state.schedule[weekday].sort((a, b) => a.start.localeCompare(b.start));
@@ -1339,6 +1515,52 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       if (!state.schedule[weekday]) return;
       state.schedule[weekday] = state.schedule[weekday].filter(ls => ls.id !== id);
       persist();
+    }
+
+    // ---- sharing a schedule with someone else ----
+    // Bundles the weekly lesson grid into a portable object. Lessons carry
+    // the subject's *name* (not its local id, which is meaningless on the
+    // receiving device) plus its color, so the receiver can match/create
+    // the subject itself.
+    function exportSchedulePayload() {
+      const schedule = {};
+      Object.keys(state.schedule).forEach(weekday => {
+        schedule[weekday] = (state.schedule[weekday] || []).map(ls => {
+          const subj = getSubject(ls.subjectId);
+          return {
+            subjectName: subj ? subj.name : "Без предмета",
+            subjectColor: subj ? subj.color : "violet",
+            start: ls.start, end: ls.end, room: ls.room, teacher: ls.teacher,
+            dateFrom: ls.dateFrom || null, dateTo: ls.dateTo || null,
+          };
+        });
+      });
+      return { schedule };
+    }
+    // Merges an incoming shared schedule into the local one: subjects are
+    // matched/created by name (so re-accepting the same share doesn't
+    // duplicate them), lessons are matched by weekday+time+subject to avoid
+    // adding the exact same pair twice.
+    function importSchedulePayload(payload) {
+      if (!payload || typeof payload !== "object" || !payload.schedule) return 0;
+      let added = 0;
+      Object.keys(payload.schedule).forEach(weekday => {
+        const list = payload.schedule[weekday] || [];
+        list.forEach(ls => {
+          if (!ls || !ls.subjectName || !ls.start || !ls.end) return;
+          const subjectId = findOrCreateSubjectByName(ls.subjectName);
+          if (!subjectId) return;
+          const existing = (state.schedule[weekday] || []).some(x => x.start === ls.start && x.end === ls.end && x.subjectId === subjectId);
+          if (existing) return;
+          addLesson({
+            weekday: Number(weekday), subjectId, start: ls.start, end: ls.end,
+            room: ls.room, teacher: ls.teacher, color: null,
+            dateFrom: ls.dateFrom, dateTo: ls.dateTo,
+          });
+          added++;
+        });
+      });
+      return added;
     }
     function getDayNote(dateKey) { return state.dayNotes[dateKey] || ""; }
     function saveDayNote(dateKey, text) { state.dayNotes[dateKey] = text; persist(); }
@@ -1362,6 +1584,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       getFilesBySubject, addFile,
       getTasks, addTask, toggleTaskDone, getUpcomingTasks,
       getWeekOf, getLessonsForWeekday, getLessonsForDate, addLesson, deleteLesson, getDayNote, saveDayNote,
+      exportSchedulePayload, importSchedulePayload,
       searchAll,
     };
   })();
@@ -1378,6 +1601,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
   function fmtDate(d) { return `${d.getDate()} ${MONTHS[d.getMonth()]}`; }
   function fmtDateShort(d) { return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; }
+  // "1 сент – 31 дек" label for a lesson's active date range, if it has one.
+  function lessonRangeLabel(ls) {
+    if (!ls.dateFrom && !ls.dateTo) return "";
+    const from = ls.dateFrom ? fmtDateShort(new Date(ls.dateFrom + "T00:00:00")) : "…";
+    const to = ls.dateTo ? fmtDateShort(new Date(ls.dateTo + "T00:00:00")) : "…";
+    return `${from} – ${to}`;
+  }
   function dateKey(d) { return d.toISOString().slice(0, 10); }
   function daysUntil(dueStr, from) {
     const due = new Date(dueStr + "T00:00:00");
@@ -1875,6 +2105,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
                 <div class="lesson-time-range">${ls.start} – ${ls.end}</div>
                 <div class="lesson-name">${escapeHtml(subj.name)}</div>
                 <div class="lesson-bottom"><span class="lesson-room">Ауд. ${ls.room}</span><span class="lesson-teacher">${escapeHtml(ls.teacher)}</span></div>
+                ${lessonRangeLabel(ls) ? `<div class="lesson-range">${lessonRangeLabel(ls)}</div>` : ""}
               </div>
             </div>`);
           list.appendChild(row);
@@ -1910,6 +2141,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
                   <div class="lesson-time-range">${ls.start} – ${ls.end}</div>
                   <div class="lesson-name">${escapeHtml(subj.name)}</div>
                   <div class="lesson-bottom"><span class="lesson-room">${ls.room ? "Ауд. " + escapeHtml(ls.room) : ""}</span><span class="lesson-teacher">${escapeHtml(ls.teacher)}</span></div>
+                  ${lessonRangeLabel(ls) ? `<div class="lesson-range">${lessonRangeLabel(ls)}</div>` : ""}
                 </div>
                 <button class="lesson-del-btn" aria-label="Удалить пару">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -2088,6 +2320,35 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   function openModal(id) { $("#modalBackdrop").classList.add("open"); $("#" + id).classList.add("open"); }
   function closeModal(id) { $("#modalBackdrop").classList.remove("open"); $("#" + id).classList.remove("open"); }
 
+  /* 9b. INCOMING SHARE — accept/decline overlay */
+  let pendingShare = null; // { id, owner_name, owner_handle, payload }
+
+  function showShareOverlay(share) {
+    pendingShare = share;
+    const name = share.owner_name || "Пользователь";
+    const handle = share.owner_handle ? ` (${share.owner_handle})` : "";
+    $("#shareOverlayAvatar").textContent = (name[0] || "?").toUpperCase();
+    $("#shareOverlayText").innerHTML = `<b>${escapeHtml(name)}${escapeHtml(handle)}</b> делится с вами расписанием пар`;
+    $("#shareOverlayAccept").disabled = false;
+    $("#shareOverlayAccept").textContent = "Принять";
+    $("#shareOverlayBackdrop").classList.add("open");
+    TelegramService.haptic("light");
+  }
+  function hideShareOverlay() {
+    $("#shareOverlayBackdrop").classList.remove("open");
+    pendingShare = null;
+  }
+
+  async function checkIncomingShare() {
+    const code = TelegramService.getStartParam();
+    if (!code) return;
+    if (!ShareService.configured()) return; // silently skip if Supabase isn't set up yet
+    try {
+      const row = await ShareService.fetchShare(code);
+      if (row && row.payload) showShareOverlay(row);
+    } catch (e) { /* link expired, already used, or offline — say nothing */ }
+  }
+
   let addNoteSubjectId = null;
   function openAddNoteModal(subjectId) {
     addNoteSubjectId = subjectId;
@@ -2140,6 +2401,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     $("#newLessonEnd").value = "10:30";
     $("#newLessonRoom").value = "";
     $("#newLessonTeacher").value = "";
+    $("#newLessonDateFrom").value = "";
+    $("#newLessonDateTo").value = "";
     const day = String(defaultDay || (((new Date().getDay() + 6) % 7) + 1));
     $all("#lessonDaySeg .seg").forEach(b => b.classList.toggle("active", b.dataset.day === day));
     $all("#lessonIconGrid .icon-opt").forEach((o, i) => o.classList.toggle("selected", i === 0));
@@ -2157,6 +2420,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   /* 10. INIT / EVENT WIRING */
   function init() {
     TelegramService.init();
+    checkIncomingShare();
 
     // collapsible home sections
     $all(".collapse-btn").forEach(btn => {
@@ -2249,9 +2513,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       const weekday = Number($("#lessonDaySeg .seg.active").dataset.day);
       const room = $("#newLessonRoom").value.trim();
       const teacher = $("#newLessonTeacher").value.trim();
+      const dateFrom = $("#newLessonDateFrom").value || null;
+      const dateTo = $("#newLessonDateTo").value || null;
+      if (dateFrom && dateTo && dateFrom > dateTo) { toast("Дата «по» раньше даты «с»"); return; }
       const chosen = $("#lessonIconGrid .icon-opt.selected");
       const color = chosen ? (chosen.dataset.color || null) : null;
-      DataService.addLesson({ weekday, subjectId, start, end, room, teacher, color });
+      DataService.addLesson({ weekday, subjectId, start, end, room, teacher, color, dateFrom, dateTo });
       closeModal("addLessonModal");
       TelegramService.haptic("success");
       toast("Пара добавлена");
@@ -2400,6 +2667,57 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       else toast(TelegramService.isAvailable() ? "Подключение аккаунта…" : "Откройте приложение в Telegram, чтобы подключить аккаунт");
     });
     if (TelegramService.getUser()) $("#tgStatus").textContent = "Подключён";
+
+    // share schedule via link
+    $("#shareScheduleRow").addEventListener("click", async () => {
+      if (!ShareService.configured()) {
+        toast("Функция не настроена — добавьте Supabase в SHARE_CONFIG");
+        return;
+      }
+      const user = TelegramService.getUser();
+      const ownerName = user?.name || localStorage.getItem("uninote_profile_name") || "Пользователь";
+      const ownerHandle = user?.handle || "";
+      $("#shareScheduleStatus").textContent = "Готовим ссылку…";
+      try {
+        const payload = DataService.exportSchedulePayload();
+        const id = await ShareService.createShare({ ownerName, ownerHandle, payload });
+        const link = `https://t.me/${SHARE_CONFIG.BOT_USERNAME}?startapp=${id}`;
+        const opened = TelegramService.shareLink(link, `${ownerName} делится с вами расписанием пар в UniNote`);
+        if (!opened) {
+          if (navigator.clipboard) { await navigator.clipboard.writeText(link); toast("Ссылка скопирована"); }
+          else toast(link);
+        }
+        TelegramService.haptic("success");
+      } catch (e) {
+        toast("Не удалось создать ссылку. Проверьте интернет-соединение.");
+      } finally {
+        $("#shareScheduleStatus").textContent = "Ссылкой в Telegram";
+      }
+    });
+
+    // incoming share overlay
+    $("#shareOverlayClose").addEventListener("click", () => {
+      TelegramService.haptic("light");
+      if (pendingShare && pendingShare.id) ShareService.deleteShare(pendingShare.id);
+      hideShareOverlay();
+    });
+    $("#shareOverlayBackdrop").addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) hideShareOverlay();
+    });
+    $("#shareOverlayAccept").addEventListener("click", () => {
+      if (!pendingShare) return;
+      $("#shareOverlayAccept").disabled = true;
+      $("#shareOverlayAccept").textContent = "Добавляем…";
+      const added = DataService.importSchedulePayload(pendingShare.payload);
+      const id = pendingShare.id;
+      hideShareOverlay();
+      TelegramService.haptic("success");
+      toast(added ? `Добавлено пар: ${added}` : "Расписание уже добавлено");
+      if (id) ShareService.deleteShare(id);
+      if (Router.current() === "schedule") UI.renderSchedule();
+      if (Router.current() === "pairs") UI.renderPairs();
+      if (Router.current() === "home") UI.renderHome();
+    });
 
     function applyTheme(mode) {
       document.documentElement.setAttribute("data-theme", mode === "dark" ? "dark" : "light");
