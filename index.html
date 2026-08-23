@@ -75,10 +75,10 @@
 .section-content{ overflow:hidden; max-height:900px; opacity:1; transition:max-height .3s ease, opacity .25s ease; }
 .section-block.collapsed .section-content{ max-height:0; opacity:0; }
 /* swipe-to-delete */
-.subject-swipe{ position:relative; overflow:hidden; border-radius:var(--radius-m); }
-.subject-swipe .subject-row{ position:relative; z-index:1; background:var(--card); transition:transform .22s ease; touch-action:pan-y; }
-.subject-swipe.swiped .subject-row{ transform:translateX(-82px); }
-.swipe-delete-action{ position:absolute; top:0; right:0; bottom:0; width:82px; background:var(--danger); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:0 var(--radius-m) var(--radius-m) 0; }
+.subject-swipe{ border-radius:var(--radius-m); }
+.subject-swipe .subject-row{ background:var(--card); }
+.subject-delete-corner{ flex:none; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; color:var(--text-3); }
+.subject-delete-corner:active{ color:var(--danger); background:var(--danger-soft); }
 /* context menu (right-click) */
 .ctx-menu{ position:fixed; z-index:70; background:var(--card); box-shadow:var(--shadow-pop); border-radius:14px; padding:6px; min-width:170px; animation:riseIn .15s ease both; }
 .ctx-menu button{ display:flex; align-items:center; gap:9px; width:100%; padding:11px 12px; font-size:14px; font-weight:600; border-radius:10px; color:var(--danger); }
@@ -993,17 +993,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     <div class="modal-body">
       <div class="field-label">Выберите формат текста</div>
       <div class="format-list" id="formatList">
-        <button class="format-opt active" data-format="txt">
-          <span class="format-icon" style="background:#EEF1F5;color:#5C6270;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M6.5 3.5h7l4 4v13a1 1 0 01-1 1h-10a1 1 0 01-1-1v-16a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.5 3.5v4h4" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
-          <span class="format-text"><b>Простой текст (.txt)</b><small>Обычный текст без форматирования</small></span>
-          <span class="format-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </button>
-        <button class="format-opt" data-format="md">
-          <span class="format-icon" style="background:#EDEBFE;color:#7C6EF6;">Mᵢ</span>
-          <span class="format-text"><b>Markdown (.md)</b><small>Текст с разметкой Markdown</small></span>
-          <span class="format-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </button>
-        <button class="format-opt" data-format="docx">
+        <button class="format-opt active" data-format="docx">
           <span class="format-icon" style="background:#E6F0FF;color:#2E6BE6;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M6.5 3.5h7l4 4v13a1 1 0 01-1 1h-10a1 1 0 01-1-1v-16a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.5 3.5v4h4" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
           <span class="format-text"><b>Word (.docx)</b><small>Документ Microsoft Word</small></span>
           <span class="format-check"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -1024,6 +1014,21 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <button class="primary-btn full" id="doExportBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0-12l4 4m-4-4l-4 4M5 14v4a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Получить текст
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: PHOTO VIEWER ===================== -->
+  <div class="modal" id="photoViewModal">
+    <div class="modal-head-static">
+      <div class="modal-title" id="photoViewTitle">Фото</div>
+      <button class="modal-x" data-close-modal="photoViewModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <img id="photoViewImg" src="" alt="" style="width:100%;border-radius:var(--radius-m);display:block;margin-bottom:16px;">
+      <button class="primary-btn full" id="photoViewDownloadBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0-12l4 4m-4-4l-4 4M5 14v4a2 2 0 002 2h10a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Скачать
       </button>
     </div>
   </div>
@@ -1357,6 +1362,17 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   function subjIconHtml(s) { return subjectIconMarkup(s.iconData || subjectIconFor(s.name)); }
   function fileEmoji(type) { return { pdf: ICONS.file, doc: ICONS.file, img: ICONS.image, code: ICONS.code }[type] || ICONS.file; }
   function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+  // Безопасно превращает сырой текст конспекта в HTML: экранирует спецсимволы
+  // (раньше текст вставлялся как innerHTML напрямую, из-за чего символы вроде
+  // "<", ">" ломали разметку и часть текста "пропадала"/съезжала) и сохраняет
+  // переносы строк и пустые строки-абзацы как есть.
+  function bodyToHtml(raw) {
+    if (!raw) return "";
+    return raw
+      .split(/\n{2,}/)
+      .map(block => `<p>${escapeHtml(block).replace(/\n/g, "<br>")}</p>`)
+      .join("");
+  }
   function highlight(text, q) {
     if (!q) return escapeHtml(text);
     const idx = text.toLowerCase().indexOf(q.toLowerCase());
@@ -1522,7 +1538,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
     /* ---------- SUBJECTS ---------- */
     renderSubjects() {
-      closeAllSwipes();
       const box = $("#subjectList");
       box.innerHTML = "";
       const subjects = DataService.getSubjects();
@@ -1536,13 +1551,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       subjects.forEach(s => {
         const c = subjColor(s.color);
         const wrap = el("div", "subject-swipe", `
-          <span class="swipe-delete-action">${ICONS.trash}</span>
           <button class="subject-row">
             <div class="subject-icon" style="background:${c.bg};color:${c.fg}">${subjIconHtml(s)}</div>
             <div style="flex:1;min-width:0;text-align:left;">
               <div class="subject-name">${escapeHtml(s.name)}</div>
               <div class="subject-meta">Конспекты: ${s.notesCount} · Файлы: ${s.filesCount}</div>
             </div>
+            <span class="subject-delete-corner">${ICONS.trash}</span>
             <span class="subject-chevron">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
@@ -1554,51 +1569,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           toast("Предмет удалён");
           UI.renderSubjects();
         };
-        // tap to open, or tap the revealed delete strip to confirm
-        row.addEventListener("click", (e) => {
-          if (row.dataset.justSwiped === "1") { row.dataset.justSwiped = ""; return; }
-          if (wrap.classList.contains("swiped")) { closeSwipe(wrap); return; }
-          Router.go("subject-detail", { id: s.id });
+        // tap on the card opens the subject
+        row.addEventListener("click", () => Router.go("subject-detail", { id: s.id }));
+        // tap on the corner trash icon deletes it (doesn't bubble to open the subject)
+        wrap.querySelector(".subject-delete-corner").addEventListener("click", (e) => {
+          e.stopPropagation();
+          doDelete();
         });
-        wrap.querySelector(".swipe-delete-action").addEventListener("click", doDelete);
-        // swipe left (pointer — works for touch, mouse and pen alike)
-        let startX = 0, startY = 0, dx = 0, dragging = false, decided = false, horizontal = false;
-        const MAX = 82;
-        row.addEventListener("pointerdown", (e) => {
-          if (e.pointerType === "mouse" && e.button !== 0) return;
-          startX = e.clientX; startY = e.clientY; dx = 0; dragging = true; decided = false; horizontal = false;
-          row.dataset.justSwiped = "";
-        });
-        row.addEventListener("pointermove", (e) => {
-          if (!dragging) return;
-          const rawDx = e.clientX - startX;
-          const rawDy = e.clientY - startY;
-          if (!decided) {
-            if (Math.abs(rawDx) < 6 && Math.abs(rawDy) < 6) return;
-            decided = true;
-            horizontal = Math.abs(rawDx) > Math.abs(rawDy);
-            if (horizontal) { closeOtherSwipes(wrap); try { row.setPointerCapture(e.pointerId); } catch (err) {} }
-          }
-          if (!horizontal) return; // let vertical scroll happen natively
-          e.preventDefault();
-          const already = wrap.classList.contains("swiped") ? -MAX : 0;
-          dx = Math.min(0, Math.max(-MAX, already + rawDx));
-          row.style.transition = "none";
-          row.style.transform = `translateX(${dx}px)`;
-        });
-        const endDrag = () => {
-          if (!dragging) return;
-          dragging = false;
-          row.style.transition = "";
-          row.style.transform = "";
-          if (horizontal) {
-            wrap.classList.toggle("swiped", dx < -MAX / 2);
-            row.dataset.justSwiped = "1";
-          }
-          dx = 0;
-        };
-        row.addEventListener("pointerup", endDrag);
-        row.addEventListener("pointercancel", endDrag);
         // right-click (desktop) context menu
         row.addEventListener("contextmenu", (e) => {
           e.preventDefault();
@@ -1641,6 +1618,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           if (f.dataUrl) {
             const ph = el("div", "ph");
             ph.style.background = `center/cover no-repeat url("${f.dataUrl}")`;
+            ph.style.cursor = "pointer";
+            ph.addEventListener("click", () => openPhotoViewer(f));
             grid.appendChild(ph);
           } else {
             const ph = el("div", "ph", ICONS.image);
@@ -1665,7 +1644,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       $("#noteDetailTitle").textContent = n.title;
       $("#noteDetailSubject").textContent = subj.name;
       $("#noteDetailTags").innerHTML = n.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
-      $("#noteDetailBody").innerHTML = n.body;
+      $("#noteDetailBody").innerHTML = bodyToHtml(n.body);
 
       const fileBox = $("#noteAttachedFile");
       if (n.attachedFile) {
@@ -1689,7 +1668,14 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       $("#doExportBtn").onclick = () => {
         const fmt = $("#formatList .format-opt.active").dataset.format;
         closeModal("exportModal");
-        toast(`Конспект сохранён как .${fmt}`);
+        try {
+          if (fmt === "docx") window.exportNoteAsDocx(n);
+          else window.exportNoteAsPdf(n);
+          toast(`Конспект сохраняется как .${fmt}…`);
+          TelegramService.haptic("success");
+        } catch (err) {
+          toast("Не удалось сгенерировать файл. Проверьте интернет-соединение.");
+        }
       };
 
       switchTabs("#noteTabs", "content");
@@ -1894,12 +1880,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   };
 
   /* 7. SHARED ELEMENT BUILDERS */
-  function closeSwipe(wrap) { wrap.classList.remove("swiped"); }
-  function closeOtherSwipes(exceptWrap) {
-    $all(".subject-swipe.swiped").forEach(w => { if (w !== exceptWrap) w.classList.remove("swiped"); });
-  }
-  function closeAllSwipes() { $all(".subject-swipe.swiped").forEach(w => w.classList.remove("swiped")); }
-
   function noteCardEl(n) {
     const subj = DataService.getSubject(n.subjectId);
     const c = subjColor(subj.color);
@@ -1921,8 +1901,30 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <div class="file-icon" style="background:${c.bg};color:${c.fg}">${fileEmoji(f.type)}</div>
       <div style="flex:1;min-width:0;"><div class="file-name">${escapeHtml(f.name)}</div><div class="file-meta">${escapeHtml(f.size)}</div></div>
       <span class="file-download"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0l4-4m-4 4l-4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`);
-    row.addEventListener("click", () => toast("Скачивание файлов скоро будет доступно"));
+    row.addEventListener("click", () => downloadFile(f));
     return row;
+  }
+
+  // Скачивает файл: если у файла есть сохранённый dataUrl (загружен через
+  // пикер файлов/фото) — реально скачивает его через временную ссылку.
+  // Если dataUrl нет (старые демо-файлы без содержимого) — честно сообщаем,
+  // что содержимого нет, вместо фальшивого "успеха".
+  function downloadFile(f) {
+    if (!f.dataUrl) { toast("У этого файла нет содержимого для скачивания"); return; }
+    const a = document.createElement("a");
+    a.href = f.dataUrl;
+    a.download = f.name || "file";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    TelegramService.haptic("light");
+  }
+
+  function openPhotoViewer(f) {
+    $("#photoViewTitle").textContent = f.name || "Фото";
+    $("#photoViewImg").src = f.dataUrl;
+    $("#photoViewDownloadBtn").onclick = () => downloadFile(f);
+    openModal("photoViewModal");
   }
 
   /* 8. TABS / SEGMENTS */
@@ -2003,6 +2005,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       $("#newNoteFilePickBtn").classList.remove("has-file");
       $("#newNoteFilePickBtn").dataset.fileName = "";
       $("#newNoteFilePickBtn").dataset.fileSize = "";
+      $("#newNoteFilePickBtn").dataset.dataUrl = "";
     } else {
       $("#newNotePhotoInput").value = "";
       $("#newNotePhotoLabel").textContent = "Выбрать фото";
@@ -2157,6 +2160,10 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       btn.dataset.fileName = f.name;
       btn.dataset.fileSize = String(f.size);
       if (!$("#newNoteTitle").value.trim()) $("#newNoteTitle").value = f.name.replace(/\.[^.]+$/, "");
+      // читаем содержимое файла, чтобы его реально можно было скачать позже
+      const reader = new FileReader();
+      reader.onload = () => { btn.dataset.dataUrl = reader.result; };
+      reader.readAsDataURL(f);
     });
     $("#newNotePhotoPickBtn").addEventListener("click", () => $("#newNotePhotoInput").click());
     $("#newNotePhotoInput").addEventListener("change", () => {
@@ -2195,6 +2202,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           subjectId: addNoteSubjectId, name: title + (btn.dataset.fileName.match(/\.[^.]+$/) || [""])[0],
           size: formatFileSize(Number(btn.dataset.fileSize) || 0),
           type: fileTypeFromName(btn.dataset.fileName),
+          dataUrl: btn.dataset.dataUrl || null,
         });
         toast("Файл добавлен");
       } else {
@@ -2316,6 +2324,61 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   document.addEventListener("DOMContentLoaded", init);
 })();
 
+</script>
+
+<!-- Генерация .docx/.pdf на клиенте для кнопки «Получить текстом» -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function () {
+  function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  // PDF через jsPDF: обычный текст конспекта с переносом строк.
+  window.exportNoteAsPdf = function (note) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const marginX = 48, marginY = 56, maxWidth = 495;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+    doc.text(note.title || "Конспект", marginX, marginY);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    const lines = doc.splitTextToSize(note.body || "", maxWidth);
+    let y = marginY + 28;
+    const lineH = 15, pageH = doc.internal.pageSize.getHeight() - marginY;
+    lines.forEach(line => {
+      if (y > pageH) { doc.addPage(); y = marginY; }
+      doc.text(line, marginX, y);
+      y += lineH;
+    });
+    triggerDownload(doc.output("blob"), (note.title || "konspekt") + ".pdf");
+  };
+
+  // DOCX: минимальный, но полностью валидный .docx (OOXML-zip), который
+  // открывается в Word/Google Docs/LibreOffice — без сторонних сервисов.
+  window.exportNoteAsDocx = function (note) {
+    const zip = new JSZip();
+    const esc = s => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const paragraphs = (note.body || "").split(/\n{2,}/).map(block =>
+      `<w:p><w:r><w:t xml:space="preserve">${esc(block).replace(/\n/g, "</w:t></w:r></w:p><w:p><w:r><w:t xml:space=\"preserve\">")}</w:t></w:r></w:p>`
+    ).join("");
+    const titlePara = `<w:p><w:pPr><w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t xml:space="preserve">${esc(note.title)}</w:t></w:r></w:p>`;
+    const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>${titlePara}${paragraphs}<w:sectPr/></w:body></w:document>`;
+    zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
+    zip.folder("_rels").file(".rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
+    zip.folder("word").file("document.xml", documentXml);
+    zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" })
+      .then(blob => triggerDownload(blob, (note.title || "konspekt") + ".docx"));
+  };
+})();
 </script>
 </body>
 </html>
