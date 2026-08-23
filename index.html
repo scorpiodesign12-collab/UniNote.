@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>UniNote — университетский органайзер</title>
-<meta name="description" content="UniNote — персональный университетский органайзер: конспекты, расписание, задания в одном месте.">
+<meta name="description" content="UniNote — персональный университетский органайзер: конспекты, расписание, важные события в одном месте.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -162,9 +162,10 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .emoji{ display:inline-block; }
 .avatar{
   width:48px; height:48px; border-radius:50%;
-  background:rgba(255,255,255,.25);
+  background:rgba(255,255,255,.94);
+  color:var(--accent);
   display:flex; align-items:center; justify-content:center;
-  font-weight:700; font-size:18px; flex:none; overflow:hidden;
+  font-weight:800; font-size:18px; flex:none; overflow:hidden;
   border:2px solid rgba(255,255,255,.5); cursor:pointer;
 }
 .avatar:active{ transform:scale(.94); }
@@ -498,6 +499,16 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   appearance:none;
 }
 
+.field-input.textarea{ resize:vertical; min-height:110px; font-family:var(--font-body); line-height:1.55; }
+.note-type-panel{ margin-top:2px; }
+.file-pick-btn{
+  width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--accent-soft); color:var(--accent); font-weight:700; font-size:14px;
+  border-radius:14px; padding:14px; border:1.5px dashed var(--accent);
+}
+.file-pick-btn:active{ transform:scale(.98); }
+.file-pick-btn.has-file{ background:var(--success-soft); color:var(--success); border-style:solid; }
+
 .icon-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
 .icon-opt{ aspect-ratio:1; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:18px; border:3px solid transparent; }
 .icon-opt.selected{ border-color:#fff; box-shadow:0 0 0 2px rgba(0,0,0,.22); }
@@ -564,7 +575,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <div class="scroll-pad">
         <div class="greeting-card">
           <div class="greeting-text">
-            <div class="greeting-hello">Привет <span class="emoji"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 13V6.5a1.5 1.5 0 013 0V12m0-.5V4.5a1.5 1.5 0 013 0V12m0-1V6.5a1.5 1.5 0 013 0v8c0 3.6-2.7 6.5-6.5 6.5S4 18.1 4 14.5V11a1.3 1.3 0 012.5-.5L8 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="greeting-hello">Привет <span class="emoji">👋</span></div>
             <div class="greeting-sub">Хорошего дня и продуктивной учёбы!</div>
           </div>
           <button class="avatar" id="userAvatar" data-nav="settings" aria-label="Профиль и настройки">?</button>
@@ -590,7 +601,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
         <div class="section-block" data-collapsible>
           <div class="section-head">
-            <h2>Ближайшие задания</h2>
+            <h2>Ближайшие важные события</h2>
             <div class="section-head-actions">
               <button class="link-btn" data-nav="tasks">Все</button>
               <button class="collapse-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -701,7 +712,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           <button class="tab" data-filter="notes">Конспекты</button>
           <button class="tab" data-filter="files">Файлы</button>
           <button class="tab" data-filter="subjects">Предметы</button>
-          <button class="tab" data-filter="tasks">Задания</button>
+          <button class="tab" data-filter="tasks">События</button>
         </div>
         <div id="searchResults"></div>
         <div class="empty-state" id="searchEmpty" hidden>
@@ -736,7 +747,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     <section class="screen" data-screen="tasks">
       <div class="scroll-pad">
         <div class="screen-header-row">
-          <h1>Задания</h1>
+          <h1>Важные события</h1>
           <button class="pill-btn" id="addTaskBtn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
             Добавить
@@ -750,7 +761,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <div id="taskGroups"></div>
         <div class="bottom-spacer"></div>
       </div>
-      <button class="fab" id="fabTasks" aria-label="Добавить задание">+</button>
+      <button class="fab" id="fabTasks" aria-label="Добавить событие">+</button>
     </section>
 
     <!-- ===================== SETTINGS ===================== -->
@@ -799,7 +810,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
             <div class="settings-row toggle-row">
               <div class="settings-row-label">
                 <span class="settings-icon" style="background:#FFEBEE;color:#FF3B30;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 2h6M19 6l1.3-1.3M5 6L3.7 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-                <span>Дедлайны заданий</span>
+                <span>Дедлайны событий</span>
               </div>
               <label class="switch"><input type="checkbox" id="toggleDeadlines" checked><span class="slider"></span></label>
             </div>
@@ -848,7 +859,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     <div class="sheet-handle"></div>
     <button class="sheet-item" data-nav="tasks">
       <span class="sheet-icon" style="background:#EDEBFE;color:#7C6EF6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 12.3l2.3 2.3 4.7-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span>Задания</span>
+      <span>Важные события</span>
       <span class="sheet-chevron">›</span>
     </button>
     <button class="sheet-item" data-nav="settings">
@@ -898,11 +909,26 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     </div>
   </div>
 
+  <!-- ===================== MODAL: EDIT PROFILE ===================== -->
+  <div class="modal" id="editProfileModal">
+    <div class="modal-head">
+      <button class="modal-cancel" data-close-modal="editProfileModal">Отмена</button>
+      <div class="modal-title">Профиль</div>
+      <button class="modal-confirm" id="saveProfileBtn">Готово</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label">Ваше имя</label>
+      <input class="field-input" id="editProfileName" placeholder="Например, Никита">
+      <label class="field-label">Факультет / группа (необязательно)</label>
+      <input class="field-input" id="editProfileFaculty" placeholder="Например, ИВТ-21">
+    </div>
+  </div>
+
   <!-- ===================== MODAL: ADD TASK ===================== -->
   <div class="modal" id="addTaskModal">
     <div class="modal-head">
       <button class="modal-cancel" data-close-modal="addTaskModal">Отмена</button>
-      <div class="modal-title">Новое задание</div>
+      <div class="modal-title">Новое важное событие</div>
       <button class="modal-confirm" id="saveTaskBtn">Готово</button>
     </div>
     <div class="modal-body">
@@ -912,6 +938,49 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <select class="field-input" id="newTaskSubject"></select>
       <label class="field-label">Дедлайн</label>
       <input class="field-input" type="date" id="newTaskDate">
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: ADD NOTE ===================== -->
+  <div class="modal" id="addNoteModal">
+    <div class="modal-head">
+      <button class="modal-cancel" data-close-modal="addNoteModal">Отмена</button>
+      <div class="modal-title">Добавить в предмет</div>
+      <button class="modal-confirm" id="saveNoteBtn">Готово</button>
+    </div>
+    <div class="modal-body">
+      <div class="segmented" id="noteTypeSeg">
+        <button class="seg active" data-note-type="text">Текст</button>
+        <button class="seg" data-note-type="file">Файл</button>
+        <button class="seg" data-note-type="photo">Фото</button>
+      </div>
+
+      <label class="field-label">Название</label>
+      <input class="field-input" id="newNoteTitle" placeholder="Например, Лекция 3">
+
+      <div class="note-type-panel" data-note-panel="text">
+        <label class="field-label">Текст конспекта</label>
+        <textarea class="field-input textarea" id="newNoteBody" rows="6" placeholder="Введите текст конспекта…"></textarea>
+      </div>
+
+      <div class="note-type-panel" data-note-panel="file" hidden>
+        <label class="field-label">Файл</label>
+        <input type="file" id="newNoteFileInput" accept=".doc,.docx,.pdf,.txt,.rtf,.xls,.xlsx,.ppt,.pptx" hidden>
+        <button type="button" class="file-pick-btn" id="newNoteFilePickBtn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0l4-4m-4 4l-4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="newNoteFileLabel">Выбрать файл</span>
+        </button>
+      </div>
+
+      <div class="note-type-panel" data-note-panel="photo" hidden>
+        <label class="field-label">Фото</label>
+        <input type="file" id="newNotePhotoInput" accept="image/*" hidden>
+        <button type="button" class="file-pick-btn" id="newNotePhotoPickBtn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="4.5" width="17" height="15" rx="2.2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.6" stroke="currentColor" stroke-width="1.5"/><path d="M4 17l4.5-4.5a2 2 0 012.8 0L14 15l1.7-1.7a2 2 0 012.8 0l2 2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <span id="newNotePhotoLabel">Выбрать фото</span>
+        </button>
+        <img id="newNotePhotoPreview" style="display:none;width:100%;border-radius:var(--radius-s);margin-top:10px;max-height:220px;object-fit:cover;">
+      </div>
     </div>
   </div>
 
@@ -1178,9 +1247,23 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     function getRecentNotes(limit = 3) {
       return [...state.notes].sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
     }
+    function addNote({ subjectId, title, body }) {
+      const id = "n_" + Date.now();
+      state.notes.push({
+        id, subjectId, title, date: dateKey(today()),
+        tags: [], body: `<p>${escapeHtml(body).replace(/\n/g, "</p><p>")}</p>`,
+        attachedFile: null,
+      });
+      persist(); return id;
+    }
 
     // ---- files ----
     function getFilesBySubject(subjectId) { return state.files.filter(f => f.subjectId === subjectId); }
+    function addFile({ subjectId, name, size, type, dataUrl }) {
+      const id = "f_" + Date.now();
+      state.files.push({ id, subjectId, name, size, type, dataUrl: dataUrl || null });
+      persist(); return id;
+    }
 
     // ---- tasks ----
     function getTasks() { return [...state.tasks].sort((a, b) => a.due.localeCompare(b.due)); }
@@ -1227,8 +1310,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
     return {
       today, getSubjects, getSubject, addSubject, deleteSubject,
-      getNotesBySubject, getNote, getRecentNotes,
-      getFilesBySubject,
+      getNotesBySubject, getNote, getRecentNotes, addNote,
+      getFilesBySubject, addFile,
       getTasks, addTask, toggleTaskDone, getUpcomingTasks,
       getWeekOf, getLessonsForWeekday, getLessonsForDate, getDayNote, saveDayNote,
       searchAll,
@@ -1294,7 +1377,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     const avatarEl = $("#userAvatar");
     const photoUrl = tgUser && tgUser.photoUrl;
     if (photoUrl) {
-      avatarEl.innerHTML = `<img src="${photoUrl}" alt="">`;
+      avatarEl.innerHTML = `<img src="${photoUrl}" alt="" onerror="this.parentElement.textContent='${name ? name.charAt(0).toUpperCase() : "?"}'">`;
     } else {
       avatarEl.textContent = name ? name.charAt(0).toUpperCase() : "?";
     }
@@ -1304,7 +1387,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     const settingsAvatar = $("#settingsAvatar");
     if (name) {
       settingsName.textContent = name;
-      settingsAvatar.innerHTML = photoUrl ? `<img src="${photoUrl}" alt="">` : "";
+      settingsAvatar.innerHTML = photoUrl ? `<img src="${photoUrl}" alt="" onerror="this.parentElement.textContent='${name.charAt(0).toUpperCase()}'">` : "";
       if (!photoUrl) settingsAvatar.textContent = name.charAt(0).toUpperCase();
       const handleParts = [];
       if (tgUser && tgUser.handle) handleParts.push(tgUser.handle);
@@ -1330,7 +1413,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   const Router = (() => {
     const titles = {
       home: "UniNote", subjects: "Предметы", "subject-detail": "Предмет", "note-detail": "Конспект",
-      search: "Поиск", schedule: "Расписание", tasks: "Задания", settings: "Настройки",
+      search: "Поиск", schedule: "Расписание", tasks: "Важные события", settings: "Настройки",
     };
     const navMap = { home: "home", subjects: "subjects", search: "search", schedule: "schedule" };
     let stack = ["home"];
@@ -1412,7 +1495,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       taskBox.innerHTML = "";
       const upcoming = DataService.getUpcomingTasks(3);
       if (!upcoming.length) {
-        taskBox.appendChild(el("div", "empty-state small", "Активных заданий нет"));
+        taskBox.appendChild(el("div", "empty-state small", "Активных событий нет"));
       } else {
         upcoming.forEach(t => {
           const subj = DataService.getSubject(t.subjectId);
@@ -1439,6 +1522,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
     /* ---------- SUBJECTS ---------- */
     renderSubjects() {
+      closeAllSwipes();
       const box = $("#subjectList");
       box.innerHTML = "";
       const subjects = DataService.getSubjects();
@@ -1471,23 +1555,50 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           UI.renderSubjects();
         };
         // tap to open, or tap the revealed delete strip to confirm
-        row.addEventListener("click", () => {
-          if (wrap.classList.contains("swiped")) { wrap.classList.remove("swiped"); return; }
+        row.addEventListener("click", (e) => {
+          if (row.dataset.justSwiped === "1") { row.dataset.justSwiped = ""; return; }
+          if (wrap.classList.contains("swiped")) { closeSwipe(wrap); return; }
           Router.go("subject-detail", { id: s.id });
         });
         wrap.querySelector(".swipe-delete-action").addEventListener("click", doDelete);
-        // swipe left (touch)
-        let startX = 0, dx = 0, dragging = false;
-        row.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; dragging = true; }, { passive: true });
-        row.addEventListener("touchmove", (e) => {
-          if (!dragging) return;
-          dx = e.touches[0].clientX - startX;
-        }, { passive: true });
-        row.addEventListener("touchend", () => {
-          dragging = false;
-          wrap.classList.toggle("swiped", dx < -40);
-          dx = 0;
+        // swipe left (pointer — works for touch, mouse and pen alike)
+        let startX = 0, startY = 0, dx = 0, dragging = false, decided = false, horizontal = false;
+        const MAX = 82;
+        row.addEventListener("pointerdown", (e) => {
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+          startX = e.clientX; startY = e.clientY; dx = 0; dragging = true; decided = false; horizontal = false;
+          row.dataset.justSwiped = "";
         });
+        row.addEventListener("pointermove", (e) => {
+          if (!dragging) return;
+          const rawDx = e.clientX - startX;
+          const rawDy = e.clientY - startY;
+          if (!decided) {
+            if (Math.abs(rawDx) < 6 && Math.abs(rawDy) < 6) return;
+            decided = true;
+            horizontal = Math.abs(rawDx) > Math.abs(rawDy);
+            if (horizontal) { closeOtherSwipes(wrap); try { row.setPointerCapture(e.pointerId); } catch (err) {} }
+          }
+          if (!horizontal) return; // let vertical scroll happen natively
+          e.preventDefault();
+          const already = wrap.classList.contains("swiped") ? -MAX : 0;
+          dx = Math.min(0, Math.max(-MAX, already + rawDx));
+          row.style.transition = "none";
+          row.style.transform = `translateX(${dx}px)`;
+        });
+        const endDrag = () => {
+          if (!dragging) return;
+          dragging = false;
+          row.style.transition = "";
+          row.style.transform = "";
+          if (horizontal) {
+            wrap.classList.toggle("swiped", dx < -MAX / 2);
+            row.dataset.justSwiped = "1";
+          }
+          dx = 0;
+        };
+        row.addEventListener("pointerup", endDrag);
+        row.addEventListener("pointercancel", endDrag);
         // right-click (desktop) context menu
         row.addEventListener("contextmenu", (e) => {
           e.preventDefault();
@@ -1527,15 +1638,21 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       } else {
         const grid = el("div", "photo-grid");
         imgFiles.forEach(f => {
-          const ph = el("div", "ph", ICONS.image);
-          ph.style.background = c.bg; ph.style.color = c.fg;
-          grid.appendChild(ph);
+          if (f.dataUrl) {
+            const ph = el("div", "ph");
+            ph.style.background = `center/cover no-repeat url("${f.dataUrl}")`;
+            grid.appendChild(ph);
+          } else {
+            const ph = el("div", "ph", ICONS.image);
+            ph.style.background = c.bg; ph.style.color = c.fg;
+            grid.appendChild(ph);
+          }
         });
         photosPanel.appendChild(grid);
       }
 
       const fab = $("#fabSubjectDetail");
-      fab.onclick = () => toast("Создание конспекта скоро будет доступно");
+      fab.onclick = () => openAddNoteModal(id);
       // reset to first tab
       switchTabs("#subjectTabs", "notes");
     },
@@ -1595,7 +1712,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         { key: "notes", label: "Конспекты", items: r.notes, render: n => searchNoteRow(n, q) },
         { key: "files", label: "Файлы", items: r.files, render: f => fileRowEl(f) },
         { key: "subjects", label: "Предметы", items: r.subjects, render: s => searchSubjectRow(s) },
-        { key: "tasks", label: "Задания", items: r.tasks, render: t => searchTaskRow(t) },
+        { key: "tasks", label: "События", items: r.tasks, render: t => searchTaskRow(t) },
       ];
 
       let any = false;
@@ -1671,7 +1788,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
       const strip = $("#weekStrip");
       strip.innerHTML = "";
-      strip.classList.toggle("hide", view === "day");
+      strip.classList.toggle("hide", view !== "week");
       week.forEach((d, i) => strip.appendChild(dayCell(d, i)));
 
       const monthBox = $("#monthGrid");
@@ -1685,7 +1802,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         const gridStart = new Date(y, m, 1 - firstDow);
         for (let wi = 0; wi < weeksCount; wi++) {
           const wDays = Array.from({ length: 7 }, (_, i) => { const x = new Date(gridStart); x.setDate(gridStart.getDate() + wi * 7 + i); return x; });
-          if (dateKey(wDays[0]) === dateKey(week[0])) continue; // already shown in the first row
           wDays.forEach((d, i) => monthBox.appendChild(dayCell(d, i)));
         }
       }
@@ -1739,7 +1855,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         const later = active.filter(t => daysUntil(t.due, today) > 4);
         if (soon.length) { box.appendChild(el("div", "task-group-title", "Скоро дедлайн")); soon.forEach(t => box.appendChild(taskItemEl(t))); }
         if (later.length) { box.appendChild(el("div", "task-group-title", "Позже")); later.forEach(t => box.appendChild(taskItemEl(t))); }
-        if (!active.length && filter === "active") box.appendChild(el("div", "empty-state small", "Активных заданий нет — можно выдохнуть"));
+        if (!active.length && filter === "active") box.appendChild(el("div", "empty-state small", "Активных событий нет — можно выдохнуть"));
       }
       if (filter !== "active") {
         const done = tasks.filter(t => t.done);
@@ -1747,7 +1863,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           box.appendChild(el("div", "task-group-title", `Выполненные (${done.length})`));
           done.forEach(t => box.appendChild(taskItemEl(t)));
         } else if (filter === "done") {
-          box.appendChild(el("div", "empty-state small", "Выполненных заданий пока нет."));
+          box.appendChild(el("div", "empty-state small", "Выполненных событий пока нет."));
         }
       }
 
@@ -1778,6 +1894,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   };
 
   /* 7. SHARED ELEMENT BUILDERS */
+  function closeSwipe(wrap) { wrap.classList.remove("swiped"); }
+  function closeOtherSwipes(exceptWrap) {
+    $all(".subject-swipe.swiped").forEach(w => { if (w !== exceptWrap) w.classList.remove("swiped"); });
+  }
+  function closeAllSwipes() { $all(".subject-swipe.swiped").forEach(w => w.classList.remove("swiped")); }
+
   function noteCardEl(n) {
     const subj = DataService.getSubject(n.subjectId);
     const c = subjColor(subj.color);
@@ -1860,6 +1982,51 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
   function openModal(id) { $("#modalBackdrop").classList.add("open"); $("#" + id).classList.add("open"); }
   function closeModal(id) { $("#modalBackdrop").classList.remove("open"); $("#" + id).classList.remove("open"); }
+
+  let addNoteSubjectId = null;
+  function openAddNoteModal(subjectId) {
+    addNoteSubjectId = subjectId;
+    $("#newNoteTitle").value = "";
+    $("#newNoteBody").value = "";
+    $all("#noteTypeSeg .seg").forEach(b => b.classList.toggle("active", b.dataset.noteType === "text"));
+    $all(".note-type-panel").forEach(p => p.hidden = p.dataset.notePanel !== "text");
+    resetFilePicker("file");
+    resetFilePicker("photo");
+    openModal("addNoteModal");
+    setTimeout(() => $("#newNoteTitle").focus(), 250);
+  }
+
+  function resetFilePicker(kind) {
+    if (kind === "file") {
+      $("#newNoteFileInput").value = "";
+      $("#newNoteFileLabel").textContent = "Выбрать файл";
+      $("#newNoteFilePickBtn").classList.remove("has-file");
+      $("#newNoteFilePickBtn").dataset.fileName = "";
+      $("#newNoteFilePickBtn").dataset.fileSize = "";
+    } else {
+      $("#newNotePhotoInput").value = "";
+      $("#newNotePhotoLabel").textContent = "Выбрать фото";
+      $("#newNotePhotoPickBtn").classList.remove("has-file");
+      $("#newNotePhotoPreview").style.display = "none";
+      $("#newNotePhotoPreview").src = "";
+      $("#newNotePhotoPickBtn").dataset.fileName = "";
+      $("#newNotePhotoPickBtn").dataset.fileSize = "";
+      $("#newNotePhotoPickBtn").dataset.dataUrl = "";
+    }
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + " Б";
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " КБ";
+    return (bytes / (1024 * 1024)).toFixed(1) + " МБ";
+  }
+
+  function fileTypeFromName(name) {
+    const ext = (name.split(".").pop() || "").toLowerCase();
+    if (ext === "pdf") return "pdf";
+    if (["doc", "docx", "rtf", "txt", "xls", "xlsx", "ppt", "pptx"].includes(ext)) return "doc";
+    return "doc";
+  }
 
   function openAddTaskModal() {
     const subjects = DataService.getSubjects();
@@ -1966,9 +2133,84 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       if (!title || !due) { toast("Заполните название и дедлайн"); return; }
       DataService.addTask({ title, subjectId, due });
       closeModal("addTaskModal");
-      toast("Задание добавлено");
+      toast("Событие добавлено");
       TelegramService.haptic("success");
       if (Router.current() === "tasks") UI.renderTasks();
+      if (Router.current() === "home") UI.renderHome();
+    });
+
+    // add note modal (text / file / photo)
+    $all("#noteTypeSeg .seg").forEach(btn => {
+      btn.addEventListener("click", () => {
+        $all("#noteTypeSeg .seg").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        $all(".note-type-panel").forEach(p => p.hidden = p.dataset.notePanel !== btn.dataset.noteType);
+      });
+    });
+    $("#newNoteFilePickBtn").addEventListener("click", () => $("#newNoteFileInput").click());
+    $("#newNoteFileInput").addEventListener("change", () => {
+      const f = $("#newNoteFileInput").files[0];
+      if (!f) return;
+      $("#newNoteFileLabel").textContent = f.name;
+      const btn = $("#newNoteFilePickBtn");
+      btn.classList.add("has-file");
+      btn.dataset.fileName = f.name;
+      btn.dataset.fileSize = String(f.size);
+      if (!$("#newNoteTitle").value.trim()) $("#newNoteTitle").value = f.name.replace(/\.[^.]+$/, "");
+    });
+    $("#newNotePhotoPickBtn").addEventListener("click", () => $("#newNotePhotoInput").click());
+    $("#newNotePhotoInput").addEventListener("change", () => {
+      const f = $("#newNotePhotoInput").files[0];
+      if (!f) return;
+      const btn = $("#newNotePhotoPickBtn");
+      btn.classList.add("has-file");
+      $("#newNotePhotoLabel").textContent = f.name;
+      btn.dataset.fileName = f.name;
+      btn.dataset.fileSize = String(f.size);
+      if (!$("#newNoteTitle").value.trim()) $("#newNoteTitle").value = f.name.replace(/\.[^.]+$/, "");
+      const reader = new FileReader();
+      reader.onload = () => {
+        btn.dataset.dataUrl = reader.result;
+        const preview = $("#newNotePhotoPreview");
+        preview.src = reader.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(f);
+    });
+    $("#saveNoteBtn").addEventListener("click", () => {
+      if (!addNoteSubjectId) return;
+      const type = $("#noteTypeSeg .seg.active").dataset.noteType;
+      const title = $("#newNoteTitle").value.trim();
+      if (!title) { toast("Введите название"); return; }
+
+      if (type === "text") {
+        const body = $("#newNoteBody").value.trim();
+        if (!body) { toast("Введите текст конспекта"); return; }
+        DataService.addNote({ subjectId: addNoteSubjectId, title, body });
+        toast("Конспект добавлен");
+      } else if (type === "file") {
+        const btn = $("#newNoteFilePickBtn");
+        if (!btn.dataset.fileName) { toast("Выберите файл"); return; }
+        DataService.addFile({
+          subjectId: addNoteSubjectId, name: title + (btn.dataset.fileName.match(/\.[^.]+$/) || [""])[0],
+          size: formatFileSize(Number(btn.dataset.fileSize) || 0),
+          type: fileTypeFromName(btn.dataset.fileName),
+        });
+        toast("Файл добавлен");
+      } else {
+        const btn = $("#newNotePhotoPickBtn");
+        if (!btn.dataset.fileName) { toast("Выберите фото"); return; }
+        DataService.addFile({
+          subjectId: addNoteSubjectId, name: title,
+          size: formatFileSize(Number(btn.dataset.fileSize) || 0),
+          type: "img", dataUrl: btn.dataset.dataUrl || null,
+        });
+        toast("Фото добавлено");
+      }
+
+      TelegramService.haptic("success");
+      closeModal("addNoteModal");
+      if (Router.current() === "subject-detail") UI.renderSubjectDetail(addNoteSubjectId);
       if (Router.current() === "home") UI.renderHome();
     });
 
@@ -2004,11 +2246,18 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     $("#editProfileBtn").addEventListener("click", () => {
       const currentName = localStorage.getItem("uninote_profile_name") || "";
       const currentFaculty = localStorage.getItem("uninote_profile_faculty") || "";
-      const name = window.prompt("Ваше имя", currentName);
-      if (name === null) return;
-      const faculty = window.prompt("Факультет / группа (необязательно)", currentFaculty);
-      localStorage.setItem("uninote_profile_name", name.trim());
-      if (faculty !== null) localStorage.setItem("uninote_profile_faculty", faculty.trim());
+      $("#editProfileName").value = currentName;
+      $("#editProfileFaculty").value = currentFaculty;
+      openModal("editProfileModal");
+      setTimeout(() => $("#editProfileName").focus(), 250);
+    });
+    $("#saveProfileBtn").addEventListener("click", () => {
+      const name = $("#editProfileName").value.trim();
+      const faculty = $("#editProfileFaculty").value.trim();
+      if (!name) { toast("Введите имя"); return; }
+      localStorage.setItem("uninote_profile_name", name);
+      localStorage.setItem("uninote_profile_faculty", faculty);
+      closeModal("editProfileModal");
       applyKnownProfile();
       toast("Профиль обновлён");
     });
