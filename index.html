@@ -571,7 +571,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   <main class="screens" id="screens">
 
     <!-- ===================== HOME ===================== -->
-    <section class="screen active" data-screen="home">
+    <section class="screen" data-screen="home">
       <div class="scroll-pad">
         <div class="greeting-card">
           <div class="greeting-text">
@@ -724,7 +724,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     </section>
 
     <!-- ===================== SCHEDULE ===================== -->
-    <section class="screen" data-screen="schedule">
+    <section class="screen active" data-screen="schedule">
       <div class="scroll-pad">
         <h1>Расписание</h1>
         <div class="segmented" id="scheduleView">
@@ -871,25 +871,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
   <!-- ===================== BOTTOM NAV ===================== -->
   <nav class="bottom-nav" id="bottomNav">
-    <button class="nav-item active" data-nav="home">
-      <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 4l8 7.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 001 1h4v-6h2v6h4a1 1 0 001-1v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Главная</span>
-    </button>
-    <button class="nav-item" data-nav="subjects">
-      <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.9"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.9"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.9"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.9"/></svg>
-      <span>Предметы</span>
-    </button>
-    <button class="nav-item" data-nav="search">
-      <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.9"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-      <span>Поиск</span>
-    </button>
-    <button class="nav-item" data-nav="schedule">
+    <button class="nav-item active" data-nav="schedule">
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
       <span>Расписание</span>
     </button>
-    <button class="nav-item" data-nav="more">
-      <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-      <span>Ещё</span>
+    <button class="nav-item" data-nav="tasks">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M8 12.5l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.9"/></svg>
+      <span>События</span>
     </button>
   </nav>
 
@@ -934,8 +922,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     <div class="modal-body">
       <label class="field-label">Название</label>
       <input class="field-input" id="newTaskName" placeholder="Например, Контрольная работа">
-      <label class="field-label">Предмет</label>
-      <select class="field-input" id="newTaskSubject"></select>
+      <label class="field-label">Предмет (необязательно)</label>
+      <input class="field-input" id="newTaskSubject" placeholder="Например, Математика">
       <label class="field-label">Дедлайн</label>
       <input class="field-input" type="date" id="newTaskDate">
     </div>
@@ -1229,6 +1217,16 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       }));
     }
     function getSubject(id) { return state.subjects.find(s => s.id === id); }
+    // Находит предмет по названию (без учёта регистра) или тихо создаёт новый —
+    // так поле «Предмет» в форме события может быть простым текстом, а
+    // отдельного экрана управления предметами для этого не нужно.
+    function findOrCreateSubjectByName(name) {
+      const clean = (name || "").trim();
+      if (!clean) return null;
+      const existing = state.subjects.find(s => s.name.toLowerCase() === clean.toLowerCase());
+      if (existing) return existing.id;
+      return addSubject({ name: clean, color: "violet" });
+    }
     function addSubject({ name, color }) {
       const id = "s_" + Date.now();
       state.subjects.push({ id, name, iconData: subjectIconFor(name), color: color || "violet" });
@@ -1256,7 +1254,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       const id = "n_" + Date.now();
       state.notes.push({
         id, subjectId, title, date: dateKey(today()),
-        tags: [], body: `<p>${escapeHtml(body).replace(/\n/g, "</p><p>")}</p>`,
+        tags: [], body: body,
         attachedFile: null,
       });
       persist(); return id;
@@ -1314,7 +1312,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     }
 
     return {
-      today, getSubjects, getSubject, addSubject, deleteSubject,
+      today, getSubjects, getSubject, addSubject, findOrCreateSubjectByName, deleteSubject,
       getNotesBySubject, getNote, getRecentNotes, addNote,
       getFilesBySubject, addFile,
       getTasks, addTask, toggleTaskDone, getUpcomingTasks,
@@ -1359,6 +1357,11 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     }
   }
   function subjColor(colorKey) { return SUBJECT_COLORS[colorKey] || SUBJECT_COLORS.violet; }
+  // Событие/задача может быть без предмета (поле необязательное) — тогда
+  // показываем заглушку вместо падения на undefined.
+  function subjOrPlaceholder(id) {
+    return DataService.getSubject(id) || { name: "Без предмета", color: "violet" };
+  }
   function subjIconHtml(s) { return subjectIconMarkup(s.iconData || subjectIconFor(s.name)); }
   function fileEmoji(type) { return { pdf: ICONS.file, doc: ICONS.file, img: ICONS.image, code: ICONS.code }[type] || ICONS.file; }
   function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
@@ -1366,12 +1369,23 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   // (раньше текст вставлялся как innerHTML напрямую, из-за чего символы вроде
   // "<", ">" ломали разметку и часть текста "пропадала"/съезжала) и сохраняет
   // переносы строк и пустые строки-абзацы как есть.
+  // Конспекты, созданные до этого фикса, уже хранятся как готовый HTML —
+  // такие данные не трогаем повторно, чтобы не экранировать их дважды.
   function bodyToHtml(raw) {
     if (!raw) return "";
+    if (/^\s*<(p|div|h[1-3])[\s>]/i.test(raw)) return raw;
     return raw
       .split(/\n{2,}/)
       .map(block => `<p>${escapeHtml(block).replace(/\n/g, "<br>")}</p>`)
       .join("");
+  }
+  // Если весь текст оказался ровно продублирован (баг клавиатуры на некоторых
+  // телефонах при быстром вводе/свайп-наборе иногда вставляет фрагмент дважды
+  // подряд) — автоматически схлопываем повтор перед сохранением.
+  function collapseAccidentalDuplication(text) {
+    if (!text || text.length < 8) return text;
+    const m = text.match(/^([\s\S]+?)\1+$/);
+    return m ? m[1] : text;
   }
   function highlight(text, q) {
     if (!q) return escapeHtml(text);
@@ -1431,8 +1445,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       home: "UniNote", subjects: "Предметы", "subject-detail": "Предмет", "note-detail": "Конспект",
       search: "Поиск", schedule: "Расписание", tasks: "Важные события", settings: "Настройки",
     };
-    const navMap = { home: "home", subjects: "subjects", search: "search", schedule: "schedule" };
-    let stack = ["home"];
+    const navMap = { schedule: "schedule", tasks: "tasks" };
+    let stack = ["schedule"];
     let params = {};
 
     function current() { return stack[stack.length - 1]; }
@@ -1458,7 +1472,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       $("#topbarBack").hidden = !showBack;
       TelegramService.setBackButtonVisible(showBack);
 
-      $all(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.nav === (navMap[screen] || (["tasks","settings"].includes(screen) ? "more" : ""))));
+      $all(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.nav === (navMap[screen] || "")));
 
       UI.onScreenShown(screen, params);
       $(".screens").scrollTop = 0;
@@ -1514,7 +1528,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         taskBox.appendChild(el("div", "empty-state small", "Активных событий нет"));
       } else {
         upcoming.forEach(t => {
-          const subj = DataService.getSubject(t.subjectId);
+          const subj = subjOrPlaceholder(t.subjectId);
           const due = dueLabel(t.due, today);
           const dc = dueColors(due.tone);
           taskBox.appendChild(el("div", "task-row", `
@@ -1737,7 +1751,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         return row;
       }
       function searchTaskRow(t) {
-        const subj = DataService.getSubject(t.subjectId);
+        const subj = subjOrPlaceholder(t.subjectId);
         const due = dueLabel(t.due, DataService.today());
         const dc = dueColors(due.tone);
         const row = el("div", "task-item", `
@@ -1854,7 +1868,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       }
 
       function taskItemEl(t) {
-        const subj = DataService.getSubject(t.subjectId);
+        const subj = subjOrPlaceholder(t.subjectId);
         const due = dueLabel(t.due, today);
         const dc = dueColors(due.tone);
         const row = el("div", "task-item", `
@@ -2032,14 +2046,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   }
 
   function openAddTaskModal() {
-    const subjects = DataService.getSubjects();
-    if (!subjects.length) {
-      toast("Сначала добавьте хотя бы один предмет");
-      return;
-    }
-    const sel = $("#newTaskSubject");
-    sel.innerHTML = subjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
     $("#newTaskName").value = "";
+    $("#newTaskSubject").value = "";
     const today = DataService.today();
     $("#newTaskDate").value = dateKey(today);
     openModal("addTaskModal");
@@ -2062,7 +2070,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       btn.addEventListener("click", () => {
         TelegramService.haptic("light");
         const target = btn.dataset.nav;
-        if (target === "more") { openMoreSheet(); return; }
         if (Router.current() !== target) Router.go(target, {}, { root: true });
       });
     });
@@ -2131,7 +2138,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     // add task modal
     $("#saveTaskBtn").addEventListener("click", () => {
       const title = $("#newTaskName").value.trim();
-      const subjectId = $("#newTaskSubject").value;
+      const subjectId = DataService.findOrCreateSubjectByName($("#newTaskSubject").value);
       const due = $("#newTaskDate").value;
       if (!title || !due) { toast("Заполните название и дедлайн"); return; }
       DataService.addTask({ title, subjectId, due });
@@ -2191,7 +2198,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       if (!title) { toast("Введите название"); return; }
 
       if (type === "text") {
-        const body = $("#newNoteBody").value.trim();
+        const body = collapseAccidentalDuplication($("#newNoteBody").value.trim());
         if (!body) { toast("Введите текст конспекта"); return; }
         DataService.addNote({ subjectId: addNoteSubjectId, title, body });
         toast("Конспект добавлен");
