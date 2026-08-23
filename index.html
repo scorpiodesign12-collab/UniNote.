@@ -85,12 +85,9 @@ h1,h2{ font-family:var(--font-display); letter-spacing:-.02em; }
 #app{
   position:relative;
   width:100%;
-  max-width:480px;
-  margin:0 auto;
   height:100dvh;
   background:var(--bg);
   overflow:hidden;
-  box-shadow:0 0 60px rgba(0,0,0,.06);
 }
 
 /* ============================================================
@@ -129,7 +126,7 @@ h1,h2{ font-family:var(--font-display); letter-spacing:-.02em; }
   pointer-events:none;
 }
 .screen.active{ opacity:1; visibility:visible; transform:none; pointer-events:auto; }
-.scroll-pad{ padding:14px 16px 0; }
+.scroll-pad{ padding:14px 16px 0; max-width:640px; margin:0 auto; }
 .bottom-spacer{ height:calc(var(--nav-h) + var(--safe-b) + 24px); }
 .bottom-spacer.big{ height:calc(96px + var(--safe-b)); }
 
@@ -443,6 +440,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   position:absolute; left:0; right:0; bottom:0; z-index:30;
   display:flex; height:calc(var(--nav-h) + var(--safe-b));
   padding-bottom:var(--safe-b);
+  max-width:640px; margin:0 auto;
   background:color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter:blur(18px);
   border-top:1px solid var(--border);
@@ -464,6 +462,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .sheet-backdrop.open{ opacity:1; visibility:visible; }
 .sheet{
   position:absolute; left:0; right:0; bottom:0; z-index:41;
+  max-width:560px; margin:0 auto;
   background:var(--card); border-radius:26px 26px 0 0; padding:10px 14px calc(20px + var(--safe-b));
   transform:translateY(100%); transition:transform .3s cubic-bezier(.32,.72,0,1);
   box-shadow:var(--shadow-pop);
@@ -483,6 +482,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .modal-backdrop.open{ opacity:1; visibility:visible; }
 .modal{
   position:absolute; left:10px; right:10px; bottom:10px; z-index:51;
+  max-width:520px; margin:0 auto;
   background:var(--card); border-radius:24px; max-height:82vh; overflow-y:auto;
   transform:translateY(120%); transition:transform .3s cubic-bezier(.32,.72,0,1);
   box-shadow:var(--shadow-pop);
@@ -537,11 +537,11 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
 /* ============================================================
    RESPONSIVE / MOTION
+   UniNote fills the whole browser viewport on every screen size —
+   no phone-frame mockup. Content columns are capped with max-width
+   + margin:auto (see .scroll-pad, .bottom-nav, .modal, .sheet) so
+   text stays readable on wide monitors without boxing the app in.
    ============================================================ */
-@media (min-width:481px){
-  body{ background:#e4e5ee; display:flex; align-items:center; justify-content:center; overflow:auto; padding:20px 0; }
-  #app{ width:412px; flex:none; height:844px; border-radius:44px; overflow:hidden; }
-}
 @media (prefers-reduced-motion:reduce){
   *{ animation-duration:.001s !important; transition-duration:.001s !important; }
 }
@@ -571,10 +571,10 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <div class="scroll-pad">
         <div class="greeting-card">
           <div class="greeting-text">
-            <div class="greeting-hello">Привет, <span id="userName">Сабина</span> <span class="emoji">🌸</span></div>
+            <div class="greeting-hello">Привет<span id="userNameWrap">, <span id="userName"></span></span> <span class="emoji">👋</span></div>
             <div class="greeting-sub">Хорошего дня и продуктивной учёбы!</div>
           </div>
-          <div class="avatar" id="userAvatar">С</div>
+          <div class="avatar" id="userAvatar">?</div>
         </div>
 
         <div class="section-block">
@@ -776,10 +776,10 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <h1>Настройки</h1>
 
         <div class="profile-card">
-          <div class="avatar big" id="settingsAvatar">С</div>
+          <div class="avatar big" id="settingsAvatar">?</div>
           <div class="profile-info">
-            <div class="profile-name" id="settingsName">Сабина Ахметова</div>
-            <div class="profile-sub" id="settingsHandle">@sabina · Экономический факультет</div>
+            <div class="profile-name" id="settingsName">Ваше имя</div>
+            <div class="profile-sub" id="settingsHandle">Нажмите, чтобы заполнить профиль</div>
           </div>
           <button class="chevron-btn" id="editProfileBtn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1105,119 +1105,17 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   };
 
   function seed() {
-    const subjects = [
-      { id: "math",  name: "Математика",       icon: "ƒx", color: "violet" },
-      { id: "hist",  name: "История",          icon: "🏛", color: "orange" },
-      { id: "eng",   name: "Английский язык",  icon: "Aa", color: "green" },
-      { id: "cs",    name: "Информатика",      icon: "💻", color: "blue" },
-      { id: "phys",  name: "Физика",           icon: "⚛",  color: "purple" },
-      { id: "econ",  name: "Экономика",        icon: "📈", color: "yellow" },
-    ];
+    // Blank slate — no demo content. The person adds their own subjects,
+    // notes, files and tasks; the schedule and day-notes fill in as they go.
+    const subjects = [];
+    const notes = [];
+    const files = [];
+    const tasks = [];
+    const schedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
+    const dayNotes = {};
 
-    const notes = [
-      {
-        id: "n1", subjectId: "math", title: "Интегралы. Лекция 4", date: "2026-08-22",
-        tags: ["#интегралы", "#лекция", "#формулы"], favorite: true,
-        attachedFile: { name: "Интегралы_лекция_4.pdf", size: "1.2 МБ" },
-        body: `<h3>Определение неопределённого интеграла</h3>
-        <p>Неопределённым интегралом от функции f(x) называется множество всех первообразных этой функции и обозначается:</p>
-        <div class="math">∫ f(x) dx = F(x) + C</div>
-        <h3>Свойства интегралов</h3>
-        <ol>
-          <li>∫ (f(x) + g(x)) dx = ∫ f(x) dx + ∫ g(x) dx</li>
-          <li>∫ k·f(x) dx = k ∫ f(x) dx</li>
-          <li>∫ f'(x) dx = f(x) + C</li>
-        </ol>
-        <h3>Таблица основных интегралов</h3>
-        <div class="math">∫ xⁿ dx = xⁿ⁺¹⁄(n+1) + C&nbsp;&nbsp;&nbsp;&nbsp;∫ sin x dx = −cos x + C</div>
-        <div class="math">∫ 1⁄x dx = ln|x| + C&nbsp;&nbsp;&nbsp;&nbsp;∫ cos x dx = sin x + C</div>
-        <div class="math">∫ eˣ dx = eˣ + C&nbsp;&nbsp;&nbsp;&nbsp;∫ 1⁄cos²x dx = tan x + C</div>
-        <h3>Примеры</h3>
-        <p>1. ∫ (3x² + 2x) dx = 3∫x²dx + 2∫x dx = x³ + x² + C</p>`,
-      },
-      {
-        id: "n2", subjectId: "math", title: "Методы интегрирования", date: "2026-08-18",
-        tags: ["#замена-переменной", "#по-частям"], favorite: false, attachedFile: null,
-        body: `<h3>Основные методы вычисления интегралов</h3><p>Замена переменной, интегрирование по частям, разложение на простые дроби — три опорных приёма для взятия сложных интегралов.</p><h3>Замена переменной</h3><p>Если u = φ(x) — дифференцируемая функция, то ∫ f(φ(x))·φ'(x) dx = ∫ f(u) du.</p>`,
-      },
-      {
-        id: "n3", subjectId: "math", title: "Практическая работа №4", date: "2026-08-15",
-        tags: ["#практика"], favorite: false, attachedFile: null,
-        body: `<h3>Задание</h3><p>Вычислить интегралы:</p><ol><li>∫ x³ dx</li><li>∫ sin(x) dx</li></ol>`,
-      },
-      {
-        id: "n4", subjectId: "hist", title: "Вторая мировая война", date: "2026-08-21",
-        tags: ["#XX-век", "#война"], favorite: true, attachedFile: { name: "Хронология_событий.docx", size: "340 КБ" },
-        body: `<h3>Причины и предпосылки</h3><p>Версальская система, экономический кризис 1929 года и рост тоталитарных режимов в Европе создали условия для крупнейшего военного конфликта XX века.</p><h3>Основные этапы</h3><ol><li>1939–1941 — начало войны в Европе</li><li>1941–1943 — расширение конфликта, коренной перелом</li><li>1944–1945 — освобождение и капитуляция</li></ol>`,
-      },
-      {
-        id: "n5", subjectId: "hist", title: "Курсовая работа", date: "2026-08-10",
-        tags: ["#курсовая"], favorite: false, attachedFile: null,
-        body: `<h3>Тема</h3><p>Внешняя политика периода холодной войны: ключевые события и последствия.</p>`,
-      },
-      {
-        id: "n6", subjectId: "eng", title: "Conditionals в английском", date: "2026-08-21",
-        tags: ["#грамматика"], favorite: true, attachedFile: null,
-        body: `<h3>Types of Conditionals</h3><p>Zero, First, Second and Third Conditionals describe different degrees of reality and probability.</p><ul><li>Zero — general truths</li><li>First — real future possibility</li><li>Second — unreal present/future</li><li>Third — unreal past</li></ul>`,
-      },
-      {
-        id: "n7", subjectId: "cs", title: "Алгоритмы сортировки", date: "2026-08-19",
-        tags: ["#алгоритмы"], favorite: false, attachedFile: { name: "sort_examples.py", size: "4 КБ" },
-        body: `<h3>Сортировка пузырьком</h3><p>Простейший алгоритм сортировки со сложностью O(n²), удобен для учебных примеров, но неэффективен на больших массивах.</p>`,
-      },
-      {
-        id: "n8", subjectId: "phys", title: "Законы Ньютона", date: "2026-08-17",
-        tags: ["#механика"], favorite: false, attachedFile: null,
-        body: `<h3>Три закона</h3><p>Первый закон Ньютона описывает инерцию, второй связывает силу и ускорение (F = ma), третий — принцип действия и противодействия.</p>`,
-      },
-      {
-        id: "n9", subjectId: "econ", title: "Спрос и предложение", date: "2026-08-14",
-        tags: ["#микроэкономика"], favorite: false, attachedFile: null,
-        body: `<h3>Закон спроса</h3><p>При прочих равных условиях снижение цены товара ведёт к росту величины спроса на него.</p>`,
-      },
-    ];
-
-    const files = [
-      { id: "f1", subjectId: "math", name: "Таблица интегралов.pdf", size: "1.2 МБ", type: "pdf", favorite: false },
-      { id: "f2", subjectId: "math", name: "Формулы интегралов.jpg", size: "450 КБ", type: "img", favorite: false },
-      { id: "f3", subjectId: "math", name: "Доп. материалы. Интегралы.docx", size: "230 КБ", type: "doc", favorite: true },
-      { id: "f4", subjectId: "hist", name: "Карта фронтов 1943.jpg", size: "1.8 МБ", type: "img", favorite: false },
-      { id: "f5", subjectId: "hist", name: "Хронология_событий.docx", size: "340 КБ", type: "doc", favorite: false },
-      { id: "f6", subjectId: "eng", name: "Irregular verbs.pdf", size: "180 КБ", type: "pdf", favorite: true },
-      { id: "f7", subjectId: "cs", name: "sort_examples.py", size: "4 КБ", type: "code", favorite: false },
-    ];
-
-    const tasks = [
-      { id: "t1", title: "Курсовая работа", subjectId: "hist", due: "2026-08-24", done: false },
-      { id: "t2", title: "Практическая работа №4", subjectId: "math", due: "2026-08-26", done: false },
-      { id: "t3", title: "Эссе", subjectId: "eng", due: "2026-08-28", done: false },
-      { id: "t4", title: "Проект по информатике", subjectId: "cs", due: "2026-09-10", done: false },
-      { id: "t5", title: "Реферат", subjectId: "phys", due: "2026-09-15", done: false },
-      { id: "t6", title: "Лабораторная работа №2", subjectId: "phys", due: "2026-08-05", done: true },
-      { id: "t7", title: "Контрольная работа", subjectId: "math", due: "2026-08-01", done: true },
-      { id: "t8", title: "Домашнее задание №3", subjectId: "econ", due: "2026-07-29", done: true },
-    ];
-
-    // Demo "today" — fixed so the seeded schedule/tasks read naturally, à la the design mock.
-    const today = new Date("2026-08-23T09:00:00");
-
-    const lessonColor = { math: "violet", hist: "orange", eng: "green", cs: "blue", phys: "purple", econ: "yellow" };
-    function L(subjectId, start, end, room, teacher) {
-      return { subjectId, start, end, room, teacher, color: lessonColor[subjectId] };
-    }
-    const schedule = {
-      1: [ L("math", "09:00", "10:30", "204", "Иванова Е. П."), L("cs", "10:45", "12:15", "312", "Козлов Д. И.") ],
-      2: [ L("phys", "09:00", "10:30", "118", "Сергеев В. Н."), L("econ", "11:00", "12:30", "220", "Фомина Т. А.") ],
-      3: [ L("math", "09:00", "10:30", "204", "Иванова Е. П."), L("hist", "11:00", "12:30", "105", "Петров А. С."), L("eng", "13:30", "15:00", "301", "Смирнова О. И.") ],
-      4: [ L("cs", "09:00", "10:30", "312", "Козлов Д. И."), L("eng", "11:00", "12:30", "301", "Смирнова О. И.") ],
-      5: [ L("math", "09:00", "10:30", "204", "Иванова Е. П."), L("phys", "10:45", "12:15", "118", "Сергеев В. Н."), L("econ", "13:00", "14:30", "220", "Фомина Т. А.") ],
-      6: [ L("hist", "10:00", "11:30", "105", "Петров А. С.") ],
-      7: [],
-    };
-
-    const dayNotes = {
-      "2026-08-23": "Не забыть распечатать материалы по истории и подготовиться к практической по математике.",
-    };
+    // "Today" tracks the real current date so an empty app behaves normally.
+    const today = new Date();
 
     return { subjects, notes, files, tasks, schedule, dayNotes, today: today.toISOString() };
   }
@@ -1381,6 +1279,45 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     return escapeHtml(text.slice(0, idx)) + "<mark style='background:var(--accent-soft);color:var(--accent);border-radius:3px;'>" + escapeHtml(text.slice(idx, idx + q.length)) + "</mark>" + escapeHtml(text.slice(idx + q.length));
   }
 
+  // Resolves the person's display name from Telegram (if opened inside the
+  // Telegram app) or from a locally-saved profile, and reflects it on the
+  // home greeting and the settings screen. Falls back to a neutral state
+  // ("fill in your profile") when nothing is known yet — no fake names.
+  function applyKnownProfile() {
+    const tgUser = TelegramService.getUser();
+    const savedName = localStorage.getItem("uninote_profile_name") || "";
+    const savedFaculty = localStorage.getItem("uninote_profile_faculty") || "";
+    const name = (tgUser && tgUser.name) || savedName;
+
+    const nameWrap = $("#userNameWrap");
+    const nameEl = $("#userName");
+    const avatarEl = $("#userAvatar");
+    if (name) {
+      nameEl.textContent = name;
+      nameWrap.style.display = "";
+      avatarEl.textContent = name.charAt(0).toUpperCase();
+    } else if (nameWrap) {
+      nameWrap.style.display = "none";
+      avatarEl.textContent = "?";
+    }
+
+    const settingsName = $("#settingsName");
+    const settingsHandle = $("#settingsHandle");
+    const settingsAvatar = $("#settingsAvatar");
+    if (name) {
+      settingsName.textContent = name;
+      settingsAvatar.textContent = name.charAt(0).toUpperCase();
+      const handleParts = [];
+      if (tgUser && tgUser.handle) handleParts.push(tgUser.handle);
+      if (savedFaculty) handleParts.push(savedFaculty);
+      settingsHandle.textContent = handleParts.length ? handleParts.join(" · ") : "Нажмите, чтобы заполнить профиль";
+    } else {
+      settingsName.textContent = "Ваше имя";
+      settingsAvatar.textContent = "?";
+      settingsHandle.textContent = "Нажмите, чтобы заполнить профиль";
+    }
+  }
+
   let toastTimer;
   function toast(msg) {
     const t = $("#toast");
@@ -1494,20 +1431,29 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
       const notesBox = $("#homeNotesList");
       notesBox.innerHTML = "";
-      DataService.getRecentNotes(3).forEach(n => notesBox.appendChild(noteCardEl(n)));
-
-      const tgUser = TelegramService.getUser();
-      if (tgUser) {
-        $("#userName").textContent = tgUser.name;
-        $("#userAvatar").textContent = tgUser.name.charAt(0).toUpperCase();
+      const recent = DataService.getRecentNotes(3);
+      if (!recent.length) {
+        notesBox.appendChild(el("div", "empty-state small", "Пока нет ни одного конспекта. Добавьте первый предмет, чтобы начать."));
+      } else {
+        recent.forEach(n => notesBox.appendChild(noteCardEl(n)));
       }
+
+      applyKnownProfile();
     },
 
     /* ---------- SUBJECTS ---------- */
     renderSubjects() {
       const box = $("#subjectList");
       box.innerHTML = "";
-      DataService.getSubjects().forEach(s => {
+      const subjects = DataService.getSubjects();
+      if (!subjects.length) {
+        const empty = el("div", "empty-state", `
+          <div class="empty-emoji">📚</div>
+          <p>Пока нет ни одного предмета.<br>Нажмите «Добавить», чтобы создать первый.</p>`);
+        box.appendChild(empty);
+        return;
+      }
+      subjects.forEach(s => {
         const c = subjColor(s.color);
         const row = el("button", "subject-row", `
           <div class="subject-icon" style="background:${c.bg};color:${c.fg}">${s.icon}</div>
@@ -1877,8 +1823,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   function closeModal(id) { $("#modalBackdrop").classList.remove("open"); $("#" + id).classList.remove("open"); }
 
   function openAddTaskModal() {
+    const subjects = DataService.getSubjects();
+    if (!subjects.length) {
+      toast("Сначала добавьте хотя бы один предмет");
+      return;
+    }
     const sel = $("#newTaskSubject");
-    sel.innerHTML = DataService.getSubjects().map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
+    sel.innerHTML = subjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
     $("#newTaskName").value = "";
     const today = DataService.today();
     $("#newTaskDate").value = dateKey(today);
@@ -2006,22 +1957,28 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       cb.addEventListener("change", () => localStorage.setItem("uninote_" + id, cb.checked ? "1" : "0"));
     });
 
+    applyKnownProfile();
+
+    $("#editProfileBtn").addEventListener("click", () => {
+      const currentName = localStorage.getItem("uninote_profile_name") || "";
+      const currentFaculty = localStorage.getItem("uninote_profile_faculty") || "";
+      const name = window.prompt("Ваше имя", currentName);
+      if (name === null) return;
+      const faculty = window.prompt("Факультет / группа (необязательно)", currentFaculty);
+      localStorage.setItem("uninote_profile_name", name.trim());
+      if (faculty !== null) localStorage.setItem("uninote_profile_faculty", faculty.trim());
+      applyKnownProfile();
+      toast("Профиль обновлён");
+    });
+
     $("#connectTelegramRow").addEventListener("click", () => {
       const user = TelegramService.getUser();
       if (user) toast(`Уже подключено как ${user.handle || user.name}`);
       else toast(TelegramService.isAvailable() ? "Подключение аккаунта…" : "Откройте приложение в Telegram, чтобы подключить аккаунт");
     });
     $("#exportAllRow").addEventListener("click", () => toast("Экспорт всех конспектов скоро будет доступен"));
-    $("#editProfileBtn").addEventListener("click", () => toast("Редактирование профиля скоро будет доступно"));
 
-    // apply telegram profile into settings screen if available
-    const tgUser = TelegramService.getUser();
-    if (tgUser) {
-      $("#settingsName").textContent = tgUser.name;
-      $("#settingsHandle").textContent = (tgUser.handle || "") + (tgUser.handle ? " · " : "") + "Экономический факультет";
-      $("#settingsAvatar").textContent = tgUser.name.charAt(0).toUpperCase();
-      $("#tgStatus").textContent = "Подключён";
-    }
+    if (TelegramService.getUser()) $("#tgStatus").textContent = "Подключён";
 
     function applyTheme(mode) {
       if (mode === "system") {
