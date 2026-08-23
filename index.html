@@ -430,6 +430,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .settings-row-label{ display:flex; align-items:center; gap:11px; font-size:14.5px; font-weight:600; }
 .settings-icon{ width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex:none; }
 .settings-value{ font-size:13.5px; color:var(--text-2); display:flex; align-items:center; gap:4px; }
+.music-toggle-btn{
+  display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:20px;
+  background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:700;
+}
+.music-toggle-btn:active{ transform:scale(.96); }
+.music-toggle-btn.playing{ background:var(--accent); color:#fff; }
 .divider{ height:1px; background:var(--border); margin-left:43px; }
 
 .theme-switcher{ display:flex; background:var(--border); border-radius:12px; padding:3px; }
@@ -852,6 +858,17 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
                 <button class="theme-opt" data-theme="dark">Тёмная</button>
               </div>
             </div>
+            <div class="settings-row">
+              <div class="settings-row-label">
+                <span class="settings-icon" style="background:#FFF1E6;color:#FF9500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 17.5a2.2 2.2 0 11-2.2-2.2A2.2 2.2 0 019 17.5zm0 0V6l10-2v9.5m-10-4l10-2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="17" cy="13.5" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                <span>Фоновая музыка</span>
+              </div>
+              <button class="music-toggle-btn" id="musicToggleBtn" aria-label="Включить/выключить музыку">
+                <svg id="musicPlayIcon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+                <svg id="musicPauseIcon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                <span id="musicToggleLabel">Включить</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1116,6 +1133,9 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
   <!-- toast -->
   <div class="toast" id="toast"></div>
+
+  <!-- background music (only starts when the person taps the button in Settings) -->
+  <audio id="bgMusic" src="music/theme.mp3" loop preload="none"></audio>
 
 </div>
 
@@ -2646,6 +2666,28 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     });
 
     applyKnownProfile();
+
+    // settings: background music (starts playing only on the person's tap)
+    const bgMusic = $("#bgMusic");
+    const musicBtn = $("#musicToggleBtn");
+    if (bgMusic && musicBtn) {
+      const playIcon = $("#musicPlayIcon"), pauseIcon = $("#musicPauseIcon"), label = $("#musicToggleLabel");
+      const syncMusicUi = (playing) => {
+        musicBtn.classList.toggle("playing", playing);
+        playIcon.hidden = playing; pauseIcon.hidden = !playing;
+        label.textContent = playing ? "Выключить" : "Включить";
+      };
+      musicBtn.addEventListener("click", () => {
+        if (bgMusic.paused) {
+          bgMusic.play().then(() => syncMusicUi(true)).catch(() => toast("Не удалось включить музыку — проверьте, что файл загружен"));
+        } else {
+          bgMusic.pause();
+          syncMusicUi(false);
+        }
+      });
+      bgMusic.addEventListener("ended", () => syncMusicUi(false)); // shouldn't fire (loop=true), kept as a safety net
+      bgMusic.addEventListener("error", () => { if (!bgMusic.paused) { syncMusicUi(false); toast("Файл музыки не найден"); } });
+    }
 
     $("#editProfileBtn").addEventListener("click", () => {
       const currentName = localStorage.getItem("uninote_profile_name") || "";
