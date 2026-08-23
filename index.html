@@ -213,6 +213,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .task-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid var(--border); }
 .task-row:first-child{ border-top:none; }
 .task-dot{ width:4px; align-self:stretch; border-radius:3px; flex:none; }
+.task-icon{ width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex:none; }
+.task-icon svg{ width:16px; height:16px; }
 .task-info{ flex:1; min-width:0; }
 .task-name{ font-weight:700; font-size:14.5px; }
 .task-sub{ font-size:12.5px; color:var(--text-2); margin-top:2px; }
@@ -797,27 +799,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         </div>
 
         <div class="settings-group">
-          <div class="settings-group-title">Уведомления</div>
-          <div class="card settings-card">
-            <div class="settings-row toggle-row">
-              <div class="settings-row-label">
-                <span class="settings-icon" style="background:#FFF1E6;color:#FF9500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 10a6 6 0 1112 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19a2 2 0 004 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-                <span>Напоминания о парах</span>
-              </div>
-              <label class="switch"><input type="checkbox" id="toggleLessons" checked><span class="slider"></span></label>
-            </div>
-            <div class="divider"></div>
-            <div class="settings-row toggle-row">
-              <div class="settings-row-label">
-                <span class="settings-icon" style="background:#FFEBEE;color:#FF3B30;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 2h6M19 6l1.3-1.3M5 6L3.7 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-                <span>Дедлайны событий</span>
-              </div>
-              <label class="switch"><input type="checkbox" id="toggleDeadlines" checked><span class="slider"></span></label>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-group">
           <div class="settings-group-title">Данные и синхронизация</div>
           <div class="card settings-card">
             <button class="settings-row link-row" id="connectTelegramRow">
@@ -826,14 +807,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
                 <span>Аккаунт Telegram</span>
               </div>
               <span class="settings-value" id="tgStatus">Не подключён</span>
-            </button>
-            <div class="divider"></div>
-            <button class="settings-row link-row" id="exportAllRow">
-              <div class="settings-row-label">
-                <span class="settings-icon" style="background:#EDEBFE;color:#7C6EF6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3.5 8L12 4l8.5 4M3.5 8v8L12 20m-8.5-12L12 12m8.5-4v8L12 20m8.5-12L12 12m0 8v-8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
-                <span>Экспортировать все конспекты</span>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
         </div>
@@ -873,7 +846,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   <nav class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-nav="schedule">
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15.5" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
-      <span>Расписание</span>
+      <span>Пары</span>
     </button>
     <button class="nav-item" data-nav="tasks">
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M8 12.5l2.5 2.5L16 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.9"/></svg>
@@ -1531,8 +1504,9 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           const subj = subjOrPlaceholder(t.subjectId);
           const due = dueLabel(t.due, today);
           const dc = dueColors(due.tone);
+          const tc = subjColor(subj.color);
           taskBox.appendChild(el("div", "task-row", `
-            <div class="task-dot" style="background:${subjColor(subj.color).fg}"></div>
+            <div class="task-icon" style="background:${tc.bg};color:${tc.fg}">${subjIconHtml(subj)}</div>
             <div class="task-info"><div class="task-name">${escapeHtml(t.title)}</div><div class="task-sub">${escapeHtml(subj.name)}</div></div>
             <div class="task-due" style="background:${dc.bg};color:${dc.fg}">${due.text}</div>`));
         });
@@ -2248,14 +2222,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       });
     });
 
-    // settings: notifications persistence
-    ["toggleLessons", "toggleDeadlines"].forEach(id => {
-      const cb = $("#" + id);
-      const saved = localStorage.getItem("uninote_" + id);
-      if (saved !== null) cb.checked = saved === "1";
-      cb.addEventListener("change", () => localStorage.setItem("uninote_" + id, cb.checked ? "1" : "0"));
-    });
-
     applyKnownProfile();
 
     $("#editProfileBtn").addEventListener("click", () => {
@@ -2282,8 +2248,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       if (user) toast(`Уже подключено как ${user.handle || user.name}`);
       else toast(TelegramService.isAvailable() ? "Подключение аккаунта…" : "Откройте приложение в Telegram, чтобы подключить аккаунт");
     });
-    $("#exportAllRow").addEventListener("click", () => toast("Экспорт всех конспектов скоро будет доступен"));
-
     if (TelegramService.getUser()) $("#tgStatus").textContent = "Подключён";
 
     function applyTheme(mode) {
