@@ -9,9 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   UniNote — design tokens
-   ============================================================ */
+/* UniNote — design tokens */
 :root{
   --accent:#7C6EF6;
   --accent-2:#9B8FFB;
@@ -66,6 +64,26 @@
 }
 
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+/* loading screen */
+.loading-screen{ position:fixed; inset:0; z-index:100; background:var(--bg); display:flex; align-items:center; justify-content:center; transition:opacity .4s ease, visibility .4s ease; }
+.loading-screen video{ width:150px; height:150px; object-fit:contain; }
+.loading-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+/* collapsible home sections */
+.section-head-actions{ display:flex; align-items:center; gap:10px; }
+.collapse-btn{ width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:var(--text-3); transition:transform .25s ease; flex:none; }
+.section-block.collapsed .collapse-btn{ transform:rotate(-90deg); }
+.section-content{ overflow:hidden; max-height:900px; opacity:1; transition:max-height .3s ease, opacity .25s ease; }
+.section-block.collapsed .section-content{ max-height:0; opacity:0; }
+/* swipe-to-delete */
+.subject-swipe{ position:relative; overflow:hidden; border-radius:var(--radius-m); }
+.subject-swipe .subject-row{ position:relative; z-index:1; background:var(--card); transition:transform .22s ease; touch-action:pan-y; }
+.subject-swipe.swiped .subject-row{ transform:translateX(-82px); }
+.swipe-delete-action{ position:absolute; top:0; right:0; bottom:0; width:82px; background:var(--danger); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:0 var(--radius-m) var(--radius-m) 0; }
+/* context menu (right-click) */
+.ctx-menu{ position:fixed; z-index:70; background:var(--card); box-shadow:var(--shadow-pop); border-radius:14px; padding:6px; min-width:170px; animation:riseIn .15s ease both; }
+.ctx-menu button{ display:flex; align-items:center; gap:9px; width:100%; padding:11px 12px; font-size:14px; font-weight:600; border-radius:10px; color:var(--danger); }
+.ctx-menu button:active{ background:var(--danger-soft); }
+.ctx-backdrop{ position:fixed; inset:0; z-index:69; }
 html,body{height:100%;}
 body{
   font-family:var(--font-body);
@@ -90,9 +108,7 @@ h1,h2{ font-family:var(--font-display); letter-spacing:-.02em; }
   overflow:hidden;
 }
 
-/* ============================================================
-   TOP BAR
-   ============================================================ */
+/* TOP BAR */
 .topbar{
   position:sticky; top:0; z-index:20;
   height:calc(var(--top-h) + var(--safe-t));
@@ -113,9 +129,7 @@ h1,h2{ font-family:var(--font-display); letter-spacing:-.02em; }
 .topbar-back:active, .topbar-action:active{ background:var(--border); }
 .topbar-back[hidden]{ display:none; }
 
-/* ============================================================
-   SCREENS
-   ============================================================ */
+/* SCREENS */
 .screens{ position:relative; height:calc(100dvh - var(--top-h) - var(--safe-t)); }
 .screen{
   position:absolute; inset:0;
@@ -133,9 +147,7 @@ h1,h2{ font-family:var(--font-display); letter-spacing:-.02em; }
 
 h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
-/* ============================================================
-   HOME
-   ============================================================ */
+/* HOME */
 .greeting-card{
   background:linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   border-radius:var(--radius-l);
@@ -152,10 +164,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   width:48px; height:48px; border-radius:50%;
   background:rgba(255,255,255,.25);
   display:flex; align-items:center; justify-content:center;
-  font-weight:700; font-size:18px; flex:none;
-  border:2px solid rgba(255,255,255,.5);
+  font-weight:700; font-size:18px; flex:none; overflow:hidden;
+  border:2px solid rgba(255,255,255,.5); cursor:pointer;
 }
-.avatar.big{ width:60px; height:60px; font-size:22px; background:var(--accent-soft); color:var(--accent); border:none; }
+.avatar:active{ transform:scale(.94); }
+.avatar img{ width:100%; height:100%; object-fit:cover; }
+.avatar.big{ width:60px; height:60px; font-size:22px; background:var(--accent-soft); color:var(--accent); border:none; cursor:default; }
 
 .section-block{ margin-top:22px; }
 .section-block.tight, .section-head.tight{ margin-top:8px; }
@@ -228,9 +242,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 }
 .fab:active{ transform:scale(.9); }
 
-/* ============================================================
-   SUBJECTS
-   ============================================================ */
+/* SUBJECTS */
 .screen-header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .screen-header-row h1{ margin:0; }
 .pill-btn{
@@ -254,9 +266,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
 @keyframes riseIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none; } }
 
-/* ============================================================
-   SUBJECT DETAIL
-   ============================================================ */
+/* SUBJECT DETAIL */
 .subject-detail-hero{
   display:flex; align-items:center; gap:14px; padding:6px 2px 18px;
 }
@@ -290,9 +300,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .photo-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
 .photo-grid .ph{ aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; }
 
-/* ============================================================
-   NOTE DETAIL
-   ============================================================ */
+/* NOTE DETAIL */
 .note-detail-head{ padding-top:4px; }
 .note-detail-head h1{ font-size:23px; margin-bottom:8px; }
 .chip{ display:inline-block; background:var(--accent-soft); color:var(--accent); font-size:12.5px; font-weight:700; padding:5px 11px; border-radius:20px; }
@@ -329,9 +337,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 }
 .icon-btn-round.active{ color:var(--danger); }
 
-/* ============================================================
-   SEARCH
-   ============================================================ */
+/* SEARCH */
 .search-title{ margin-bottom:12px; }
 .search-bar{
   display:flex; align-items:center; gap:9px; background:var(--card); border-radius:16px;
@@ -349,14 +355,15 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .empty-state.small{ padding:24px 10px; font-size:13.5px; }
 .empty-emoji{ font-size:40px; margin-bottom:14px; }
 
-/* ============================================================
-   SCHEDULE
-   ============================================================ */
+/* SCHEDULE */
 .segmented{ display:flex; background:var(--border); border-radius:14px; padding:4px; margin-bottom:16px; }
 .seg{ flex:1; padding:9px 4px; border-radius:11px; font-weight:700; font-size:13.5px; color:var(--text-2); text-align:center; }
 .seg.active{ background:var(--card); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.08); }
 
-.week-strip{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:18px; }
+.week-strip{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:18px; overflow:hidden; max-height:90px; opacity:1; transition:max-height .3s ease, opacity .25s ease, margin .3s ease; }
+.week-strip.hide{ max-height:0; opacity:0; margin-bottom:0; pointer-events:none; }
+.month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; max-height:0; opacity:0; overflow:hidden; margin-top:-18px; transition:max-height .35s ease, opacity .3s ease, margin .3s ease; }
+.month-grid.show{ max-height:800px; opacity:1; margin-top:0; margin-bottom:18px; }
 .week-day{
   display:flex; flex-direction:column; align-items:center; gap:5px; padding:9px 0; border-radius:14px; background:var(--card); box-shadow:var(--shadow-card);
 }
@@ -365,6 +372,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .week-day.selected{ background:var(--accent); }
 .week-day.selected .wd-name{ color:rgba(255,255,255,.75); }
 .week-day.selected .wd-num{ background:#fff; color:var(--accent); }
+.week-day.other-month{ opacity:.35; }
+.week-day.is-today .wd-num{ box-shadow:0 0 0 1.5px var(--accent) inset; }
 
 .day-title{ font-family:var(--font-display); font-weight:800; font-size:16.5px; margin-bottom:12px; }
 .day-notes{
@@ -373,9 +382,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 }
 .day-notes::placeholder{ color:var(--text-3); }
 
-/* ============================================================
-   TASKS
-   ============================================================ */
+/* TASKS */
 #taskGroups{ margin-top:16px; }
 .task-group-title{ font-size:13px; font-weight:700; color:var(--text-2); margin:16px 2px 8px; }
 .task-group-title:first-child{ margin-top:0; }
@@ -396,14 +403,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .task-item-sub{ font-size:12.5px; color:var(--text-2); margin-top:2px; }
 .task-item-due{ font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:20px; white-space:nowrap; }
 
-/* ============================================================
-   FAVORITES
-   ============================================================ */
-#favList .note-card{ margin-bottom:10px; }
-
-/* ============================================================
-   SETTINGS
-   ============================================================ */
+/* SETTINGS */
 .profile-card{
   display:flex; align-items:center; gap:14px; background:var(--card); border-radius:var(--radius-m);
   padding:16px; box-shadow:var(--shadow-card); margin-bottom:22px;
@@ -434,9 +434,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .switch input:checked + .slider{ background:var(--success); }
 .switch input:checked + .slider::before{ transform:translateX(19px); }
 
-/* ============================================================
-   BOTTOM NAV
-   ============================================================ */
+/* BOTTOM NAV */
 .bottom-nav{
   position:absolute; left:0; right:0; bottom:0; z-index:30;
   display:flex; height:calc(var(--nav-h) + var(--safe-b));
@@ -454,9 +452,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .nav-item.active{ color:var(--accent); }
 .nav-item:active{ transform:scale(.92); }
 
-/* ============================================================
-   SHEET (Ещё)
-   ============================================================ */
+/* SHEET (Ещё) */
 .sheet-backdrop{
   position:absolute; inset:0; background:rgba(10,10,16,.4); z-index:40; opacity:0; visibility:hidden; transition:opacity .22s ease;
 }
@@ -474,9 +470,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .sheet-icon{ width:36px; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:16px; }
 .sheet-chevron{ margin-left:auto; color:var(--text-3); font-size:18px; }
 
-/* ============================================================
-   MODALS
-   ============================================================ */
+/* MODALS */
 .modal-backdrop{
   position:absolute; inset:0; background:rgba(10,10,16,.45); z-index:50; opacity:0; visibility:hidden; transition:opacity .2s ease;
 }
@@ -525,9 +519,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .primary-btn.full{ width:100%; }
 .primary-btn:active{ transform:scale(.98); }
 
-/* ============================================================
-   TOAST
-   ============================================================ */
+/* TOAST */
 .toast{
   position:absolute; left:50%; bottom:calc(var(--nav-h) + var(--safe-b) + 18px); transform:translate(-50%,12px);
   background:var(--text); color:var(--bg); font-size:13.5px; font-weight:600;
@@ -536,13 +528,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 }
 .toast.show{ opacity:1; transform:translate(-50%,0); }
 
-/* ============================================================
-   RESPONSIVE / MOTION
-   UniNote fills the whole browser viewport on every screen size —
-   no phone-frame mockup. Content columns are capped with max-width
-   + margin:auto (see .scroll-pad, .bottom-nav, .modal, .sheet) so
-   text stays readable on wide monitors without boxing the app in.
-   ============================================================ */
+/* motion */
 @media (prefers-reduced-motion:reduce){
   *{ animation-duration:.001s !important; transition-duration:.001s !important; }
 }
@@ -551,6 +537,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+
+<div class="loading-screen" id="loadingScreen">
+  <video autoplay muted playsinline id="loadingVideo">
+    <source src="loading.webm" type="video/webm">
+  </video>
+</div>
 
 <div id="app">
 
@@ -572,41 +564,55 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <div class="scroll-pad">
         <div class="greeting-card">
           <div class="greeting-text">
-            <div class="greeting-hello">Привет<span id="userNameWrap">, <span id="userName"></span></span> <span class="emoji"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 13V6.5a1.5 1.5 0 013 0V12m0-.5V4.5a1.5 1.5 0 013 0V12m0-1V6.5a1.5 1.5 0 013 0v8c0 3.6-2.7 6.5-6.5 6.5S4 18.1 4 14.5V11a1.3 1.3 0 012.5-.5L8 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="greeting-hello">Привет <span class="emoji"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 13V6.5a1.5 1.5 0 013 0V12m0-.5V4.5a1.5 1.5 0 013 0V12m0-1V6.5a1.5 1.5 0 013 0v8c0 3.6-2.7 6.5-6.5 6.5S4 18.1 4 14.5V11a1.3 1.3 0 012.5-.5L8 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
             <div class="greeting-sub">Хорошего дня и продуктивной учёбы!</div>
           </div>
-          <div class="avatar" id="userAvatar">?</div>
+          <button class="avatar" id="userAvatar" data-nav="settings" aria-label="Профиль и настройки">?</button>
         </div>
 
-        <div class="section-block">
+        <div class="section-block" data-collapsible>
           <div class="section-head">
             <h2 id="todayDate">Сегодня</h2>
-          </div>
-          <div class="card list-card" id="homeScheduleCard">
-            <div class="list-card-head">
-              <span>Расписание</span>
-              <button class="link-btn" data-nav="schedule">Все пары</button>
+            <div class="section-head-actions">
+              <button class="collapse-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             </div>
-            <div class="lesson-list" id="homeScheduleList"></div>
+          </div>
+          <div class="section-content">
+            <div class="card list-card" id="homeScheduleCard">
+              <div class="list-card-head">
+                <span>Расписание</span>
+                <button class="link-btn" data-nav="schedule">Все пары</button>
+              </div>
+              <div class="lesson-list" id="homeScheduleList"></div>
+            </div>
           </div>
         </div>
 
-        <div class="section-block">
+        <div class="section-block" data-collapsible>
           <div class="section-head">
             <h2>Ближайшие задания</h2>
-            <button class="link-btn" data-nav="tasks">Все</button>
+            <div class="section-head-actions">
+              <button class="link-btn" data-nav="tasks">Все</button>
+              <button class="collapse-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
           </div>
-          <div class="card list-card" id="homeTasksCard">
-            <div id="homeTasksList"></div>
+          <div class="section-content">
+            <div class="card list-card" id="homeTasksCard">
+              <div id="homeTasksList"></div>
+            </div>
           </div>
         </div>
 
-        <div class="section-block">
+        <div class="section-block" data-collapsible>
           <div class="section-head">
             <h2>Последние конспекты</h2>
-            <button class="link-btn" data-nav="favorites">Все</button>
+            <div class="section-head-actions">
+              <button class="collapse-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
           </div>
-          <div id="homeNotesList" class="note-strip"></div>
+          <div class="section-content">
+            <div id="homeNotesList" class="note-strip"></div>
+          </div>
         </div>
         <div class="bottom-spacer"></div>
       </div>
@@ -658,7 +664,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <div class="tabs" id="noteTabs">
           <button class="tab active" data-tab="content">Конспект</button>
           <button class="tab" data-tab="files">Файлы</button>
-          <button class="tab" data-tab="fav">Избранное</button>
         </div>
 
         <div class="tab-panel active" data-panel="content">
@@ -667,9 +672,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         </div>
         <div class="tab-panel" data-panel="files">
           <div id="noteDetailFiles" class="file-list"></div>
-        </div>
-        <div class="tab-panel" data-panel="fav">
-          <div class="empty-state small">Пока ничего не добавлено в избранное из этого конспекта.</div>
         </div>
         <div class="bottom-spacer big"></div>
       </div>
@@ -681,9 +683,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <button class="secondary-btn accent-fill" id="noteExportBtn">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
           Получить текстом
-        </button>
-        <button class="icon-btn-round" id="noteFavBtn" aria-label="В избранное">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 21s-6.7-4.35-9.3-8.2C.86 9.9 2.1 6 5.6 5.2 7.9 4.7 10 5.9 12 8.2 14 5.9 16.1 4.7 18.4 5.2 21.9 6 23.14 9.9 21.3 12.8 18.7 16.65 12 21 12 21z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         </button>
       </div>
     </section>
@@ -723,6 +722,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           <button class="seg" data-view="day">День</button>
         </div>
         <div class="week-strip" id="weekStrip"></div>
+        <div class="month-grid" id="monthGrid"></div>
         <div class="day-title" id="scheduleDayTitle"></div>
         <div class="lesson-list detailed" id="scheduleLessonList"></div>
         <div class="section-head tight"><h2>Заметки на день</h2></div>
@@ -753,24 +753,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <button class="fab" id="fabTasks" aria-label="Добавить задание">+</button>
     </section>
 
-    <!-- ===================== FAVORITES ===================== -->
-    <section class="screen" data-screen="favorites">
-      <div class="scroll-pad">
-        <h1>Избранное</h1>
-        <div class="tabs scroll-tabs" id="favTabs">
-          <button class="tab active" data-filter="all">Всё</button>
-          <button class="tab" data-filter="notes">Конспекты</button>
-          <button class="tab" data-filter="files">Файлы</button>
-        </div>
-        <div id="favList"></div>
-        <div class="empty-state" id="favEmpty" hidden>
-          <div class="empty-emoji"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7.5-4.7-9.7-9.4C.8 7 2.4 3.5 6 3c2.2-.3 4.2 1 6 3.2C13.8 4 15.8 2.7 18 3c3.6.5 5.2 4 3.7 7.6C19.5 15.3 12 20 12 20z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
-          <p>Пока пусто. Добавляйте конспекты<br>и файлы в избранное, чтобы быстро находить их здесь.</p>
-        </div>
-        <div class="bottom-spacer"></div>
-      </div>
-    </section>
-
     <!-- ===================== SETTINGS ===================== -->
     <section class="screen" data-screen="settings">
       <div class="scroll-pad">
@@ -796,8 +778,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
                 <span>Тема приложения</span>
               </div>
               <div class="theme-switcher" id="themeSwitcher">
-                <button class="theme-opt active" data-theme="system">Авто</button>
-                <button class="theme-opt" data-theme="light">Светлая</button>
+                <button class="theme-opt active" data-theme="light">Светлая</button>
                 <button class="theme-opt" data-theme="dark">Тёмная</button>
               </div>
             </div>
@@ -817,18 +798,10 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
             <div class="divider"></div>
             <div class="settings-row toggle-row">
               <div class="settings-row-label">
-                <span class="settings-icon" style="background:#FFEBEE;color:#FF3B30;">⏰</span>
+                <span class="settings-icon" style="background:#FFEBEE;color:#FF3B30;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 2h6M19 6l1.3-1.3M5 6L3.7 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
                 <span>Дедлайны заданий</span>
               </div>
               <label class="switch"><input type="checkbox" id="toggleDeadlines" checked><span class="slider"></span></label>
-            </div>
-            <div class="divider"></div>
-            <div class="settings-row toggle-row">
-              <div class="settings-row-label">
-                <span class="settings-icon" style="background:#E8F8ED;color:#34C759;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
-                <span>Советы и новости UniNote</span>
-              </div>
-              <label class="switch"><input type="checkbox" id="toggleNews"><span class="slider"></span></label>
             </div>
           </div>
         </div>
@@ -838,7 +811,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           <div class="card settings-card">
             <button class="settings-row link-row" id="connectTelegramRow">
               <div class="settings-row-label">
-                <span class="settings-icon" style="background:#E6F4FF;color:#229ED9;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 4L3 11l6 2.3M21 4l-7 17-4.7-7.7M21 4L9 13.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span class="settings-icon" style="background:#E6F4FF;color:#229ED9;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.7 3.6L2.5 10.8c-1 .4-1 1.1.2 1.4l4.6 1.4 1.8 5.6c.2.7.6.9 1.1.9.5 0 .7-.2 1-.6l2.5-2.5 5 3.7c.9.6 1.6.3 1.8-.8l3.2-15.1c.3-1.3-.5-1.9-1-1.7z"/></svg></span>
                 <span>Аккаунт Telegram</span>
               </div>
               <span class="settings-value" id="tgStatus">Не подключён</span>
@@ -876,11 +849,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     <button class="sheet-item" data-nav="tasks">
       <span class="sheet-icon" style="background:#EDEBFE;color:#7C6EF6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 12.3l2.3 2.3 4.7-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       <span>Задания</span>
-      <span class="sheet-chevron">›</span>
-    </button>
-    <button class="sheet-item" data-nav="favorites">
-      <span class="sheet-icon" style="background:#FFF0F0;color:#FF3B30;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7.5-4.7-9.7-9.4C.8 7 2.4 3.5 6 3c2.2-.3 4.2 1 6 3.2C13.8 4 15.8 2.7 18 3c3.6.5 5.2 4 3.7 7.6C19.5 15.3 12 20 12 20z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
-      <span>Избранное</span>
       <span class="sheet-chevron">›</span>
     </button>
     <button class="sheet-item" data-nav="settings">
@@ -997,25 +965,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 </div>
 
 <script>
-/* ==============================================================
-   UniNote — app.js
-   Architecture:
-   - TelegramService  : thin wrapper around window.Telegram.WebApp
-   - Store            : local persistence (localStorage today, swappable for a
-                         remote API/database later — see Store.remote stub)
-   - DataService      : the ONLY layer screens talk to. Every function here
-                         is written so it can become `await fetch(...)`
-                         without any UI code changing.
-   - UI               : rendering + event wiring per screen
-   - Router            : screen navigation / history
-   ============================================================== */
+/* app.js — TelegramService, Store, DataService (UI's only data layer), UI (render+events), Router (navigation) */
 
 (function () {
   "use strict";
 
-  /* ============================================================
-     0. TELEGRAM WEBAPP INTEGRATION
-     ============================================================ */
+  /* 0. TELEGRAM WEBAPP INTEGRATION */
   const TelegramService = (() => {
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -1052,7 +1007,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     function getUser() {
       if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const u = tg.initDataUnsafe.user;
-        return { name: u.first_name || "Студент", handle: u.username ? "@" + u.username : "" };
+        return { name: u.first_name || "Студент", handle: u.username ? "@" + u.username : "", photoUrl: u.photo_url || "" };
       }
       return null;
     }
@@ -1062,9 +1017,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     return { init, haptic, setBackButtonVisible, getUser, isAvailable };
   })();
 
-  /* ============================================================
-     1. STORE — persistence layer (swap-ready for a backend)
-     ============================================================ */
+  /* 1. STORE — persistence layer (swap-ready for a backend) */
   const Store = (() => {
     const KEY = "uninote_state_v1";
 
@@ -1091,9 +1044,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     return { load, save, remote };
   })();
 
-  /* ============================================================
-     2. MOCK DATA (seed) — matches the provided design reference
-     ============================================================ */
+  /* 2. MOCK DATA (seed) — matches the provided design reference */
   const SUBJECT_COLORS = {
     violet: { bg: "#EDEBFE", fg: "#7C6EF6" },
     orange: { bg: "#FFF1E6", fg: "#FF9500" },
@@ -1127,6 +1078,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     file: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6.5 3.5h7l4 4v13a1 1 0 01-1 1h-10a1 1 0 01-1-1v-16a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.5 3.5v4h4" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
     note: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.5 3.5h9l4 4v13a1 1 0 01-1 1h-12a1 1 0 01-1-1v-16a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 10h7M8.5 13.5h7M8.5 17h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
     calendarCheck: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15.5" rx="2.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 14.5l2.3 2.3 4.7-4.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    trash: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9.5 7V4.8a1 1 0 011-1h3a1 1 0 011 1V7M6.5 7l1 12.2a2 2 0 002 1.8h5a2 2 0 002-2L18.5 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     // subject pictograms
     mathAxes: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 16l4-6 3 4 3-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     feather: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 4c-6 0-14 4-14 12 0 2 1 4 1 4l13-13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 17l-4 4M9 12l3 3M12.5 8.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
@@ -1182,9 +1134,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     return { subjects, notes, files, tasks, schedule, dayNotes, today: today.toISOString() };
   }
 
-  /* ============================================================
-     3. DATA SERVICE — the only API the UI is allowed to call
-     ============================================================ */
+  /* 3. DATA SERVICE — the only API the UI is allowed to call */
   const DataService = (() => {
     let state = Store.load();
     if (!state) { state = seed(); Store.save(state); }
@@ -1211,34 +1161,26 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       persist();
       return id;
     }
+    function deleteSubject(id) {
+      state.subjects = state.subjects.filter(s => s.id !== id);
+      state.notes = state.notes.filter(n => n.subjectId !== id);
+      state.files = state.files.filter(f => f.subjectId !== id);
+      state.tasks = state.tasks.filter(t => t.subjectId !== id);
+      Object.keys(state.schedule).forEach(k => { state.schedule[k] = state.schedule[k].filter(ls => ls.subjectId !== id); });
+      persist();
+    }
 
     // ---- notes ----
     function getNotesBySubject(subjectId) {
       return state.notes.filter(n => n.subjectId === subjectId).sort((a, b) => b.date.localeCompare(a.date));
     }
     function getNote(id) { return state.notes.find(n => n.id === id); }
-    function toggleNoteFavorite(id) {
-      const n = getNote(id); if (!n) return;
-      n.favorite = !n.favorite; persist(); return n.favorite;
-    }
     function getRecentNotes(limit = 3) {
       return [...state.notes].sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
     }
 
     // ---- files ----
     function getFilesBySubject(subjectId) { return state.files.filter(f => f.subjectId === subjectId); }
-    function toggleFileFavorite(id) {
-      const f = state.files.find(x => x.id === id); if (!f) return;
-      f.favorite = !f.favorite; persist(); return f.favorite;
-    }
-
-    // ---- favorites ----
-    function getFavorites() {
-      return {
-        notes: state.notes.filter(n => n.favorite),
-        files: state.files.filter(f => f.favorite),
-      };
-    }
 
     // ---- tasks ----
     function getTasks() { return [...state.tasks].sort((a, b) => a.due.localeCompare(b.due)); }
@@ -1284,19 +1226,16 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     }
 
     return {
-      today, getSubjects, getSubject, addSubject,
-      getNotesBySubject, getNote, toggleNoteFavorite, getRecentNotes,
-      getFilesBySubject, toggleFileFavorite,
-      getFavorites,
+      today, getSubjects, getSubject, addSubject, deleteSubject,
+      getNotesBySubject, getNote, getRecentNotes,
+      getFilesBySubject,
       getTasks, addTask, toggleTaskDone, getUpcomingTasks,
       getWeekOf, getLessonsForWeekday, getLessonsForDate, getDayNote, saveDayNote,
       searchAll,
     };
   })();
 
-  /* ============================================================
-     4. HELPERS
-     ============================================================ */
+  /* 4. HELPERS */
   const $ = sel => document.querySelector(sel);
   const $all = sel => Array.from(document.querySelectorAll(sel));
   const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
@@ -1352,16 +1291,12 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     const savedFaculty = localStorage.getItem("uninote_profile_faculty") || "";
     const name = (tgUser && tgUser.name) || savedName;
 
-    const nameWrap = $("#userNameWrap");
-    const nameEl = $("#userName");
     const avatarEl = $("#userAvatar");
-    if (name) {
-      nameEl.textContent = name;
-      nameWrap.style.display = "";
-      avatarEl.textContent = name.charAt(0).toUpperCase();
-    } else if (nameWrap) {
-      nameWrap.style.display = "none";
-      avatarEl.textContent = "?";
+    const photoUrl = tgUser && tgUser.photoUrl;
+    if (photoUrl) {
+      avatarEl.innerHTML = `<img src="${photoUrl}" alt="">`;
+    } else {
+      avatarEl.textContent = name ? name.charAt(0).toUpperCase() : "?";
     }
 
     const settingsName = $("#settingsName");
@@ -1369,7 +1304,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     const settingsAvatar = $("#settingsAvatar");
     if (name) {
       settingsName.textContent = name;
-      settingsAvatar.textContent = name.charAt(0).toUpperCase();
+      settingsAvatar.innerHTML = photoUrl ? `<img src="${photoUrl}" alt="">` : "";
+      if (!photoUrl) settingsAvatar.textContent = name.charAt(0).toUpperCase();
       const handleParts = [];
       if (tgUser && tgUser.handle) handleParts.push(tgUser.handle);
       if (savedFaculty) handleParts.push(savedFaculty);
@@ -1390,13 +1326,11 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
   }
 
-  /* ============================================================
-     5. ROUTER
-     ============================================================ */
+  /* 5. ROUTER */
   const Router = (() => {
     const titles = {
       home: "UniNote", subjects: "Предметы", "subject-detail": "Предмет", "note-detail": "Конспект",
-      search: "Поиск", schedule: "Расписание", tasks: "Задания", favorites: "Избранное", settings: "Настройки",
+      search: "Поиск", schedule: "Расписание", tasks: "Задания", settings: "Настройки",
     };
     const navMap = { home: "home", subjects: "subjects", search: "search", schedule: "schedule" };
     let stack = ["home"];
@@ -1425,7 +1359,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       $("#topbarBack").hidden = !showBack;
       TelegramService.setBackButtonVisible(showBack);
 
-      $all(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.nav === (navMap[screen] || (["tasks","favorites","settings"].includes(screen) ? "more" : ""))));
+      $all(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.nav === (navMap[screen] || (["tasks","settings"].includes(screen) ? "more" : ""))));
 
       UI.onScreenShown(screen, params);
       $(".screens").scrollTop = 0;
@@ -1436,9 +1370,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     return { go, back, current, render, get params() { return params; } };
   })();
 
-  /* ============================================================
-     6. UI — rendering per screen
-     ============================================================ */
+  /* 6. UI — rendering per screen */
   const UI = {
     onScreenShown(screen, params) {
       switch (screen) {
@@ -1449,7 +1381,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         case "search": this.renderSearch(); break;
         case "schedule": this.renderSchedule(); break;
         case "tasks": this.renderTasks(); break;
-        case "favorites": this.renderFavorites(); break;
         case "settings": break;
       }
     },
@@ -1520,17 +1451,49 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       }
       subjects.forEach(s => {
         const c = subjColor(s.color);
-        const row = el("button", "subject-row", `
-          <div class="subject-icon" style="background:${c.bg};color:${c.fg}">${subjIconHtml(s)}</div>
-          <div style="flex:1;min-width:0;text-align:left;">
-            <div class="subject-name">${escapeHtml(s.name)}</div>
-            <div class="subject-meta">Конспекты: ${s.notesCount} · Файлы: ${s.filesCount}</div>
-          </div>
-          <span class="subject-chevron">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>`);
-        row.addEventListener("click", () => Router.go("subject-detail", { id: s.id }));
-        box.appendChild(row);
+        const wrap = el("div", "subject-swipe", `
+          <span class="swipe-delete-action">${ICONS.trash}</span>
+          <button class="subject-row">
+            <div class="subject-icon" style="background:${c.bg};color:${c.fg}">${subjIconHtml(s)}</div>
+            <div style="flex:1;min-width:0;text-align:left;">
+              <div class="subject-name">${escapeHtml(s.name)}</div>
+              <div class="subject-meta">Конспекты: ${s.notesCount} · Файлы: ${s.filesCount}</div>
+            </div>
+            <span class="subject-chevron">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>`);
+        const row = wrap.querySelector(".subject-row");
+        const doDelete = () => {
+          DataService.deleteSubject(s.id);
+          TelegramService.haptic("success");
+          toast("Предмет удалён");
+          UI.renderSubjects();
+        };
+        // tap to open, or tap the revealed delete strip to confirm
+        row.addEventListener("click", () => {
+          if (wrap.classList.contains("swiped")) { wrap.classList.remove("swiped"); return; }
+          Router.go("subject-detail", { id: s.id });
+        });
+        wrap.querySelector(".swipe-delete-action").addEventListener("click", doDelete);
+        // swipe left (touch)
+        let startX = 0, dx = 0, dragging = false;
+        row.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; dragging = true; }, { passive: true });
+        row.addEventListener("touchmove", (e) => {
+          if (!dragging) return;
+          dx = e.touches[0].clientX - startX;
+        }, { passive: true });
+        row.addEventListener("touchend", () => {
+          dragging = false;
+          wrap.classList.toggle("swiped", dx < -40);
+          dx = 0;
+        });
+        // right-click (desktop) context menu
+        row.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          openCtxMenu(e.clientX, e.clientY, [{ label: "Удалить предмет", icon: ICONS.trash, action: doDelete }]);
+        });
+        box.appendChild(wrap);
       });
     },
 
@@ -1604,14 +1567,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       filesList.innerHTML = "";
       relatedFiles.forEach(f => filesList.appendChild(fileRowEl(f)));
 
-      const favBtn = $("#noteFavBtn");
-      favBtn.classList.toggle("active", !!n.favorite);
-      favBtn.onclick = () => {
-        const isFav = DataService.toggleNoteFavorite(n.id);
-        favBtn.classList.toggle("active", isFav);
-        TelegramService.haptic("light");
-        toast(isFav ? "Добавлено в избранное" : "Убрано из избранного");
-      };
       $("#noteShareBtn").onclick = () => { TelegramService.haptic("light"); toast("Ссылка скопирована"); };
       $("#noteExportBtn").onclick = () => openModal("exportModal");
       $("#doExportBtn").onclick = () => {
@@ -1692,21 +1647,48 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
     /* ---------- SCHEDULE ---------- */
     scheduleSelectedDate: null,
+    scheduleView: "week",
+    setScheduleView(view) {
+      if (view === "day") this.scheduleSelectedDate = new Date(DataService.today());
+      this.scheduleView = view;
+      this.renderSchedule();
+    },
     renderSchedule() {
       const today = DataService.today();
       if (!this.scheduleSelectedDate) this.scheduleSelectedDate = new Date(today);
       const selected = this.scheduleSelectedDate;
+      const view = this.scheduleView;
       const week = DataService.getWeekOf(selected);
+      const dayCell = (d, i) => {
+        const isSel = dateKey(d) === dateKey(selected);
+        const isToday = dateKey(d) === dateKey(today);
+        const inMonth = d.getMonth() === selected.getMonth();
+        const cls = "week-day" + (isSel ? " selected" : "") + (isToday && !isSel ? " is-today" : "") + (inMonth ? "" : " other-month");
+        const cell = el("button", cls, `<span class="wd-name">${WEEKDAYS_SHORT[i]}</span><span class="wd-num">${d.getDate()}</span>`);
+        cell.addEventListener("click", () => { UI.scheduleSelectedDate = d; UI.renderSchedule(); });
+        return cell;
+      };
 
       const strip = $("#weekStrip");
       strip.innerHTML = "";
-      week.forEach((d, i) => {
-        const isSel = dateKey(d) === dateKey(selected);
-        const cell = el("button", "week-day" + (isSel ? " selected" : ""), `
-          <span class="wd-name">${WEEKDAYS_SHORT[i]}</span><span class="wd-num">${d.getDate()}</span>`);
-        cell.addEventListener("click", () => { UI.scheduleSelectedDate = d; UI.renderSchedule(); });
-        strip.appendChild(cell);
-      });
+      strip.classList.toggle("hide", view === "day");
+      week.forEach((d, i) => strip.appendChild(dayCell(d, i)));
+
+      const monthBox = $("#monthGrid");
+      monthBox.innerHTML = "";
+      monthBox.classList.toggle("show", view === "month");
+      if (view === "month") {
+        const y = selected.getFullYear(), m = selected.getMonth();
+        const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const weeksCount = Math.ceil((firstDow + daysInMonth) / 7);
+        const gridStart = new Date(y, m, 1 - firstDow);
+        for (let wi = 0; wi < weeksCount; wi++) {
+          const wDays = Array.from({ length: 7 }, (_, i) => { const x = new Date(gridStart); x.setDate(gridStart.getDate() + wi * 7 + i); return x; });
+          if (dateKey(wDays[0]) === dateKey(week[0])) continue; // already shown in the first row
+          wDays.forEach((d, i) => monthBox.appendChild(dayCell(d, i)));
+        }
+      }
 
       const dow = (selected.getDay() + 6) % 7;
       $("#scheduleDayTitle").textContent = `${WEEKDAYS_FULL[dow][0].toUpperCase()}${WEEKDAYS_FULL[dow].slice(1)}, ${fmtDate(selected)}`;
@@ -1793,23 +1775,9 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       $("#fabTasks").onclick = () => openAddTaskModal();
       $("#addTaskBtn").onclick = () => openAddTaskModal();
     },
-
-    /* ---------- FAVORITES ---------- */
-    renderFavorites() {
-      const filter = $("#favTabs .tab.active").dataset.filter;
-      const { notes, files } = DataService.getFavorites();
-      const box = $("#favList");
-      box.innerHTML = "";
-      let any = false;
-      if (filter !== "files" && notes.length) { any = true; notes.forEach(n => box.appendChild(noteCardEl(n))); }
-      if (filter !== "notes" && files.length) { any = true; files.forEach(f => box.appendChild(fileRowEl(f))); }
-      $("#favEmpty").hidden = any;
-    },
   };
 
-  /* ============================================================
-     7. SHARED ELEMENT BUILDERS
-     ============================================================ */
+  /* 7. SHARED ELEMENT BUILDERS */
   function noteCardEl(n) {
     const subj = DataService.getSubject(n.subjectId);
     const c = subjColor(subj.color);
@@ -1819,19 +1787,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       <div style="flex:1;min-width:0;">
         <div class="note-title">${escapeHtml(n.title)}</div>
         <div class="note-meta">${escapeHtml(subj.name)} · ${d.toLocaleDateString("ru-RU")}</div>
-      </div>
-      <span class="note-bookmark ${n.favorite ? "active" : ""}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="${n.favorite ? "currentColor" : "none"}"><path d="M6 3.5h12a1 1 0 011 1V21l-7-4-7 4V4.5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-      </span>`);
-    card.addEventListener("click", (e) => {
-      if (e.target.closest(".note-bookmark")) {
-        DataService.toggleNoteFavorite(n.id);
-        TelegramService.haptic("light");
-        Router.render();
-        return;
-      }
-      Router.go("note-detail", { id: n.id });
-    });
+      </div>`);
+    card.addEventListener("click", () => Router.go("note-detail", { id: n.id }));
     return card;
   }
 
@@ -1846,9 +1803,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     return row;
   }
 
-  /* ============================================================
-     8. TABS / SEGMENTS
-     ============================================================ */
+  /* 8. TABS / SEGMENTS */
   function switchTabs(scopeSel, tabKey) {
     const scope = $(scopeSel);
     if (!scope) return;
@@ -1881,9 +1836,28 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     });
   }
 
-  /* ============================================================
-     9. MODALS & SHEET
-     ============================================================ */
+  /* 9. MODALS & SHEET */
+  function openCtxMenu(x, y, items) {
+    $all(".ctx-menu, .ctx-backdrop").forEach(n => n.remove());
+    const backdrop = el("div", "ctx-backdrop");
+    const menu = el("div", "ctx-menu");
+    items.forEach(it => {
+      const btn = el("button", "", `${it.icon || ""}<span>${it.label}</span>`);
+      btn.addEventListener("click", () => { backdrop.remove(); menu.remove(); it.action(); });
+      menu.appendChild(btn);
+    });
+    document.body.appendChild(backdrop);
+    document.body.appendChild(menu);
+    const vw = window.innerWidth, vh = window.innerHeight;
+    requestAnimationFrame(() => {
+      const r = menu.getBoundingClientRect();
+      menu.style.left = Math.min(x, vw - r.width - 10) + "px";
+      menu.style.top = Math.min(y, vh - r.height - 10) + "px";
+    });
+    backdrop.addEventListener("click", () => { backdrop.remove(); menu.remove(); });
+    backdrop.addEventListener("contextmenu", (e) => { e.preventDefault(); backdrop.remove(); menu.remove(); });
+  }
+
   function openModal(id) { $("#modalBackdrop").classList.add("open"); $("#" + id).classList.add("open"); }
   function closeModal(id) { $("#modalBackdrop").classList.remove("open"); $("#" + id).classList.remove("open"); }
 
@@ -1901,11 +1875,17 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     openModal("addTaskModal");
   }
 
-  /* ============================================================
-     10. INIT / EVENT WIRING
-     ============================================================ */
+  /* 10. INIT / EVENT WIRING */
   function init() {
     TelegramService.init();
+
+    // collapsible home sections
+    $all(".collapse-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        btn.closest(".section-block").classList.toggle("collapsed");
+      });
+    });
 
     // bottom nav
     $all(".nav-item").forEach(btn => {
@@ -1949,11 +1929,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     wireTabGroup("#subjectTabs");
     wireTabGroup("#noteTabs");
     wireTabGroup("#searchTabs", () => UI.renderSearch());
-    wireTabGroup("#favTabs", () => UI.renderFavorites());
     wireSegGroup("#taskFilter", () => UI.renderTasks());
-    wireSegGroup("#scheduleView", (btn) => {
-      if (btn.dataset.view !== "week") toast("Этот вид расписания скоро будет доступен");
-    });
+    wireSegGroup("#scheduleView", (btn) => UI.setScheduleView(btn.dataset.view));
 
     // search input
     const searchInput = $("#searchInput");
@@ -2001,8 +1978,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       btn.classList.add("active");
     }));
 
-    // settings: theme
-    const savedTheme = localStorage.getItem("uninote_theme") || "system";
+    // settings: theme (light/dark only)
+    const savedTheme = localStorage.getItem("uninote_theme") || "light";
     applyTheme(savedTheme);
     $all(".theme-opt").forEach(btn => {
       if (btn.dataset.theme === savedTheme) btn.classList.add("active"); else btn.classList.remove("active");
@@ -2015,7 +1992,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     });
 
     // settings: notifications persistence
-    ["toggleLessons", "toggleDeadlines", "toggleNews"].forEach(id => {
+    ["toggleLessons", "toggleDeadlines"].forEach(id => {
       const cb = $("#" + id);
       const saved = localStorage.getItem("uninote_" + id);
       if (saved !== null) cb.checked = saved === "1";
@@ -2046,12 +2023,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     if (TelegramService.getUser()) $("#tgStatus").textContent = "Подключён";
 
     function applyTheme(mode) {
-      if (mode === "system") {
-        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-      } else {
-        document.documentElement.setAttribute("data-theme", mode);
-      }
+      document.documentElement.setAttribute("data-theme", mode === "dark" ? "dark" : "light");
     }
 
     function buildSubjectIconGrid() {
@@ -2075,6 +2047,21 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 
     // initial render
     Router.render();
+
+    // loading screen: fades away once the intro video finishes playing
+    // (or after a safety timeout if the file is missing / blocked)
+    const loader = $("#loadingScreen");
+    if (loader) {
+      const video = $("#loadingVideo");
+      const hide = () => loader.classList.add("hide");
+      let done = false;
+      const finish = () => { if (done) return; done = true; hide(); };
+      if (video) {
+        video.addEventListener("ended", finish);
+        video.addEventListener("error", finish);
+      }
+      setTimeout(finish, 3800); // safety fallback
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);
