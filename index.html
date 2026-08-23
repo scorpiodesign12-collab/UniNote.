@@ -1150,8 +1150,8 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
           open the Mini App directly — no bot server code needed for sharing.
      ============================================================ */
   const SHARE_CONFIG = {
-    SUPABASE_URL: "",       // e.g. "https://xxxxx.supabase.co"
-    SUPABASE_ANON_KEY: "",  // the "anon public" API key from Supabase
+    SUPABASE_URL: "https://hupouojycmnabswumurc.supabase.co",
+    SUPABASE_ANON_KEY: "sb_publishable_p55oz_QTpdnOjJF8Wx5elQ_0BKbW1Y_",
     BOT_USERNAME: "UniNoteHelperBot",
   };
 
@@ -1244,7 +1244,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         headers: {
           "Content-Type": "application/json",
           "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY,
-          "Authorization": "Bearer " + SHARE_CONFIG.SUPABASE_ANON_KEY,
           "Prefer": "return=minimal",
         },
         body: JSON.stringify([{ id, owner_name: ownerName || "", owner_handle: ownerHandle || "", payload }]),
@@ -1256,7 +1255,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     async function fetchShare(id) {
       if (!configured()) throw new Error("not_configured");
       const res = await fetch(SHARE_CONFIG.SUPABASE_URL + "/rest/v1/shared_schedules?id=eq." + encodeURIComponent(id) + "&select=*", {
-        headers: { "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY, "Authorization": "Bearer " + SHARE_CONFIG.SUPABASE_ANON_KEY },
+        headers: { "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY },
       });
       if (!res.ok) throw new Error("fetch_failed");
       const rows = await res.json();
@@ -1268,7 +1267,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       if (!configured()) return;
       fetch(SHARE_CONFIG.SUPABASE_URL + "/rest/v1/shared_schedules?id=eq." + encodeURIComponent(id), {
         method: "DELETE",
-        headers: { "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY, "Authorization": "Bearer " + SHARE_CONFIG.SUPABASE_ANON_KEY },
+        headers: { "apikey": SHARE_CONFIG.SUPABASE_ANON_KEY },
       }).catch(() => {});
     }
 
