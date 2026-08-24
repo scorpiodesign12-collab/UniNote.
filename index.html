@@ -261,6 +261,14 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 }
 .fab:active{ transform:scale(.9); }
 
+/* SCHEDULE HEADER */
+.schedule-title-block{ margin-bottom:14px; }
+.schedule-eyebrow{ display:block; font-size:13px; font-weight:600; color:var(--text-2); margin-bottom:2px; }
+.schedule-title-block h1{ margin:0; }
+#scheduleMonthLabel{ display:inline-block; }
+#scheduleMonthLabel.month-swap{ animation:monthSwap .38s cubic-bezier(.2,.8,.2,1); }
+@keyframes monthSwap{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
 /* SUBJECTS */
 .screen-header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .screen-header-row h1{ margin:0; }
@@ -292,6 +300,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
 .subject-detail-hero .subject-icon{ width:56px; height:56px; border-radius:16px; font-size:24px; }
 .subject-detail-hero h1{ margin:0; font-size:22px; }
 .subject-detail-hero .subject-meta{ font-size:13px; }
+.subject-detail-actions{ display:flex; justify-content:flex-end; margin:-8px 0 16px; }
 
 .tabs{ display:flex; gap:6px; background:var(--border); padding:4px; border-radius:14px; margin-bottom:16px; }
 .tabs.scroll-tabs{ overflow-x:auto; background:none; padding:0; gap:8px; }
@@ -688,7 +697,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         </div>
         <div class="bottom-spacer"></div>
       </div>
-      <button class="fab" id="fabHome" aria-label="Добавить">+</button>
     </section>
 
     <!-- ===================== SUBJECTS ===================== -->
@@ -704,13 +712,18 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <div class="subject-list" id="subjectList"></div>
         <div class="bottom-spacer"></div>
       </div>
-      <button class="fab" id="fabSubjects" aria-label="Добавить">+</button>
     </section>
 
     <!-- ===================== SUBJECT DETAIL ===================== -->
     <section class="screen" data-screen="subject-detail">
       <div class="scroll-pad">
         <div class="subject-detail-hero" id="subjectDetailHero"></div>
+        <div class="subject-detail-actions">
+          <button class="pill-btn" id="addNoteBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+            Добавить конспект
+          </button>
+        </div>
         <div class="tabs" id="subjectTabs">
           <button class="tab active" data-tab="notes">Конспекты</button>
           <button class="tab" data-tab="files">Файлы</button>
@@ -721,7 +734,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <div class="tab-panel" data-panel="photos" id="subjectPhotosPanel"></div>
         <div class="bottom-spacer"></div>
       </div>
-      <button class="fab" id="fabSubjectDetail" aria-label="Добавить конспект">+</button>
     </section>
 
     <!-- ===================== NOTE DETAIL ===================== -->
@@ -787,7 +799,10 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     <!-- ===================== SCHEDULE ===================== -->
     <section class="screen active" data-screen="schedule">
       <div class="scroll-pad">
-        <h1>Расписание</h1>
+        <div class="schedule-title-block">
+          <span class="schedule-eyebrow">Расписание</span>
+          <h1 id="scheduleMonthLabel">Август</h1>
+        </div>
         <div class="segmented" id="scheduleView">
           <button class="seg active" data-view="week">Неделя</button>
           <button class="seg" data-view="month">Месяц</button>
@@ -801,17 +816,21 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         <textarea class="day-notes" id="dayNotesInput" placeholder="Например: не забыть распечатать материалы…"></textarea>
         <div class="bottom-spacer"></div>
       </div>
-      <button class="fab" id="fabSchedule" aria-label="Добавить пару">+</button>
     </section>
 
     <!-- ===================== PAIRS (weekly overview) ===================== -->
     <section class="screen" data-screen="pairs">
       <div class="scroll-pad">
-        <h1>Пары</h1>
+        <div class="screen-header-row">
+          <h1>Пары</h1>
+          <button class="pill-btn" id="addPairBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+            Добавить
+          </button>
+        </div>
         <div id="pairsWeek"></div>
         <div class="bottom-spacer"></div>
       </div>
-      <button class="fab" id="fabPairs" aria-label="Добавить пару">+</button>
     </section>
 
     <!-- ===================== TASKS ===================== -->
@@ -1409,23 +1428,19 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     const schedule = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
     const dayNotes = {};
 
-    // "Today" tracks the real current date so an empty app behaves normally.
-    const today = new Date();
-
-    return { subjects, notes, files, tasks, schedule, dayNotes, today: today.toISOString() };
+    return { subjects, notes, files, tasks, schedule, dayNotes };
   }
 
   /* 3. DATA SERVICE — the only API the UI is allowed to call */
   const DataService = (() => {
     let state = Store.load();
     if (!state) { state = seed(); Store.save(state); }
-    // Always keep "today" pinned to the design's reference date for a coherent demo,
-    // even across reloads of a previously-saved state shape.
-    if (!state.today) state.today = seed().today;
 
     function persist() { Store.save(state); }
 
-    function today() { return new Date(state.today); }
+    // "Today" always reflects the real current date/time — never frozen or persisted,
+    // so the app stays accurate across days without needing a reload.
+    function today() { return new Date(); }
 
     // ---- subjects ----
     function getSubjects() {
@@ -1656,6 +1671,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
   const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
 
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+  const MONTHS_NOM = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
   const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   const WEEKDAYS_FULL = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"];
   const WEEKDAYS_SHORT = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
@@ -1995,8 +2011,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         photosPanel.appendChild(grid);
       }
 
-      const fab = $("#fabSubjectDetail");
-      fab.onclick = () => openAddNoteModal(id);
+      $("#addNoteBtn").onclick = () => openAddNoteModal(id);
       // reset to first tab
       switchTabs("#subjectTabs", "notes");
     },
@@ -2160,6 +2175,15 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       const dow = (selected.getDay() + 6) % 7;
       $("#scheduleDayTitle").textContent = `${WEEKDAYS_FULL[dow][0].toUpperCase()}${WEEKDAYS_FULL[dow].slice(1)}, ${fmtDate(selected)}`;
 
+      const monthLabel = $("#scheduleMonthLabel");
+      const monthName = MONTHS_NOM[selected.getMonth()];
+      if (monthLabel.textContent !== monthName) {
+        monthLabel.textContent = monthName;
+        monthLabel.classList.remove("month-swap");
+        void monthLabel.offsetWidth;
+        monthLabel.classList.add("month-swap");
+      }
+
       const list = $("#scheduleLessonList");
       list.innerHTML = "";
       const lessons = DataService.getLessonsForDate(selected);
@@ -2227,7 +2251,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       note.value = DataService.getDayNote(dateKey(selected));
       note.oninput = () => DataService.saveDayNote(dateKey(selected), note.value);
 
-      $("#fabSchedule").onclick = () => openAddLessonModal();
     },
 
     /* ---------- PAIRS (weekly overview) ---------- */
@@ -2613,8 +2636,6 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     $("#topbarAction").addEventListener("click", () => Router.go("settings"));
 
     // FAB on home -> add subject shortcut menu (goes to subjects add)
-    $("#fabHome").addEventListener("click", () => openAddTaskModal());
-    $("#fabSubjects").addEventListener("click", () => openAddSubjectModal());
     $("#addSubjectBtn").addEventListener("click", () => openAddSubjectModal());
 
     // tabs / segments
@@ -2653,7 +2674,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
     // add lesson (pair) modal
     buildLessonIconGrid();
     wireSegGroup("#lessonDaySeg");
-    $("#fabPairs").addEventListener("click", () => openAddLessonModal());
+    $("#addPairBtn").addEventListener("click", () => openAddLessonModal());
     $("#saveLessonBtn").addEventListener("click", () => {
       const subjectName = $("#newLessonSubject").value.trim();
       const start = $("#newLessonStart").value;
