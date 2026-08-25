@@ -902,6 +902,13 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
               </div>
               <span class="settings-value" id="shareScheduleStatus">Ссылкой в Telegram</span>
             </button>
+            <button class="settings-row link-row" id="sendScheduleTextRow">
+              <div class="settings-row-label">
+                <span class="settings-icon" style="background:#F3ECFF;color:#7C5CFC;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4l16 8-16 8 4-8-4-8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span>Прислать расписание</span>
+              </div>
+              <span class="settings-value" id="sendScheduleTextStatus">Текстом от бота</span>
+            </button>
           </div>
         </div>
 
@@ -1578,6 +1585,30 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       persist();
     }
 
+    // ---- schedule as a nicely formatted text message ----
+    const WEEKDAY_NAMES = { 1: "Понедельник", 2: "Вторник", 3: "Среда", 4: "Четверг", 5: "Пятница", 6: "Суббота", 7: "Воскресенье" };
+    function formatSchedulePlainText() {
+      const lines = ["📅 <b>Моё расписание — UniNote</b>", ""];
+      let hasAny = false;
+      for (let day = 1; day <= 7; day++) {
+        const lessons = (state.schedule[day] || []).slice().sort((a, b) => a.start.localeCompare(b.start));
+        if (!lessons.length) continue;
+        hasAny = true;
+        lines.push(`<b>${WEEKDAY_NAMES[day]}</b>`);
+        lessons.forEach(ls => {
+          const subj = getSubject(ls.subjectId);
+          const name = subj ? subj.name : "Пара";
+          let line = `• ${ls.start}–${ls.end} ${name}`;
+          if (ls.room) line += `, ауд. ${ls.room}`;
+          if (ls.teacher) line += `, ${ls.teacher}`;
+          lines.push(line);
+        });
+        lines.push("");
+      }
+      if (!hasAny) lines.push("Расписание пока пустое — добавьте пары в разделе «Пары».");
+      return lines.join("\n").trim();
+    }
+
     // ---- sharing a schedule with someone else ----
     // Bundles the weekly lesson grid into a portable object. Lessons carry
     // the subject's *name* (not its local id, which is meaningless on the
@@ -1659,7 +1690,7 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
       getFilesBySubject, addFile,
       getTasks, addTask, toggleTaskDone, deleteTask, getUpcomingTasks,
       getWeekOf, getLessonsForWeekday, getLessonsForDate, getLesson, addLesson, updateLesson, deleteLesson, getDayNote, saveDayNote,
-      exportSchedulePayload, importSchedulePayload,
+      exportSchedulePayload, importSchedulePayload, formatSchedulePlainText,
       searchAll,
     };
   })();
@@ -2871,6 +2902,35 @@ h1{ font-size:26px; font-weight:800; margin:2px 0 14px; }
         toast("Не удалось создать ссылку. Проверьте интернет-соединение.");
       } finally {
         $("#shareScheduleStatus").textContent = "Ссылкой в Telegram";
+      }
+    });
+
+    // send schedule as a formatted text message from the bot
+    $("#sendScheduleTextRow").addEventListener("click", async () => {
+      if (!TelegramService.isAvailable()) {
+        toast("Откройте приложение в Telegram, чтобы отправить в чат");
+        return;
+      }
+      const tg = window.Telegram.WebApp;
+      const text = DataService.formatSchedulePlainText();
+      $("#sendScheduleTextStatus").textContent = "Отправляем…";
+      try {
+        const res = await fetch("https://vinarchuk.pythonanywhere.com/api/send-schedule", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ initData: tg.initData, text }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          toast("Расписание отправлено в чат с ботом");
+          TelegramService.haptic("success");
+        } else {
+          toast("Не удалось отправить. Попробуйте ещё раз.");
+        }
+      } catch (e) {
+        toast("Ошибка соединения с сервером");
+      } finally {
+        $("#sendScheduleTextStatus").textContent = "Текстом от бота";
       }
     });
 
